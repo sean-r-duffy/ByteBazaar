@@ -1,13 +1,22 @@
 from sqlalchemy import create_engine, Integer, String, Float, ForeignKey
-from sqlalchemy.orm import mapped_column, declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import mapped_column, DeclarativeBase, Session
 import mysql
 import constants
 
-
 engine = create_engine(constants.DATABASE_URI, echo=True)
 
-Base = declarative_base()
+
+# Base = declarative_base()
+class Base(DeclarativeBase):
+    def insert(self):
+        with Session(engine) as session:
+            session.add(self)
+            session.commit()
+
+    def delete(self):
+        with Session(engine) as session:
+            session.delete(self)
+            session.commit()
 
 
 class Product(Base):
