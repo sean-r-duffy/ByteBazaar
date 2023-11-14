@@ -5,5 +5,3 @@ from tables import *
 
 if __name__ == '__main__':
     create_schema()
-
-# Test Comment
