@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Integer, String, Float, ForeignKey
+from sqlalchemy import create_engine, Integer, String, Float, ForeignKey, DateTime, CheckConstraint
 from sqlalchemy.orm import mapped_column, DeclarativeBase, Session
 import mysql
 import constants
@@ -26,7 +26,8 @@ class Product(Base):
     name = mapped_column(String(50))
     description = mapped_column(String(200))
     category_id = mapped_column(Integer, ForeignKey('category.category_id'))
-    price = mapped_column(Integer)
+    price = mapped_column(Float)
+    inventory = mapped_column(Integer)
 
 
 class Category(Base):
@@ -49,6 +50,8 @@ class Seller(Base):
 
     seller_id = mapped_column(Integer, primary_key=True)
     name = mapped_column(String(50))
+    username = mapped_column(String(40))
+    password = mapped_column(String(40))
 
 
 class Sells(Base):
@@ -61,11 +64,12 @@ class Sells(Base):
 class Campaign(Base):
     __tablename__ = 'campaign'
 
-    campaign_id = mapped_column(Integer, primary_key=True)
+    campaign_id = mapped_column(String(20), primary_key=True)
     product_id = mapped_column(Integer, ForeignKey('product.product_id'))
     influencer_id = mapped_column(Integer, ForeignKey('influencer.influencer_id'))
     url = mapped_column(String(100))
     platform_name = mapped_column(String(50), ForeignKey('platform.name'))
+    units_sold = mapped_column(Integer)
 
 
 class Influencer(Base):
@@ -73,6 +77,8 @@ class Influencer(Base):
 
     influencer_id = mapped_column(Integer, primary_key=True)
     name = mapped_column(String(50), nullable=False)
+    username = mapped_column(String(40))
+    password = mapped_column(String(40))
 
 
 class Platform(Base):
@@ -96,6 +102,7 @@ class Review(Base):
     product_id = mapped_column(Integer, ForeignKey('product.product_id'), primary_key=True)
     rating = mapped_column(Integer)
     text = mapped_column(String(1000))
+    CheckConstraint('rating <= 10 AND rating >= 0')
 
 
 class Sale(Base):
@@ -105,6 +112,8 @@ class Sale(Base):
     order_id = mapped_column(Integer, ForeignKey('order.order_id'))
     product_id = mapped_column(Integer, ForeignKey('product.product_id'))
     quantity = mapped_column(Integer)
+    datetime = mapped_column(DateTime)
+    promo_code = mapped_column(String(20), ForeignKey('campaign.campaign_id'))
 
 
 class Buyer(Base):
@@ -112,6 +121,8 @@ class Buyer(Base):
 
     buyer_id = mapped_column(Integer, primary_key=True)
     name = mapped_column(String(50), nullable=False)
+    username = mapped_column(String(40))
+    password = mapped_column(String(40))
 
 
 class Payment(Base):
