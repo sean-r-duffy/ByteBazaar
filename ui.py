@@ -16,8 +16,10 @@ class User:
 
     def login(self):
         clear_screen()
-        self.username = input(f"Enter {self.role} username: ")
-        self.password = getpass.getpass(f"Enter {self.role} password: ")
+        print(f'{self.role} Login')
+        print('-'*20)
+        self.username = input(f"Enter username: ")
+        self.password = getpass.getpass(f"Enter password: ")
         response = self.db.authenticate_user(self.username, self.password)
        
         return response
