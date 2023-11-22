@@ -18,6 +18,9 @@ class User:
         clear_screen()
         self.username = input(f"Enter {self.role} username: ")
         self.password = getpass.getpass(f"Enter {self.role} password: ")
+        response = self.db.authenticate_user(self.username, self.password)
+       
+        return response
 
 
     def register(self):
@@ -45,8 +48,19 @@ class User:
     
     def add_to_cart(self, product_id):
         self.db.add_product_to_cart(self.username,product_id)
-    
 
+    def get_address(self):
+        return self.db.get_user_address(self.username)
+
+    def get_payment(self):
+        return self.db.get_user_payment(self.username)
+    
+    def change_address(self, street, state, postal):
+        return self.db.update_address(self.username, street, state, postal)
+    
+    def change_payment(self, payment):
+        return self.db.update_payment(self.username, payment)
+    
 class ECommerceApp:
     def __init__(self):
         self.user = None
@@ -98,8 +112,7 @@ class ECommerceApp:
         elif answers['main_menu']=='Cart':
             print('Cart')
         elif answers['main_menu']=='Profile':
-            print('Profile')
-
+            self.profile()
     def seller_main_menu(self):
         clear_screen()
         options = ['Add Product', 'View Sales','Logout']
@@ -167,12 +180,94 @@ class ECommerceApp:
         view_each_product(page_number)
 
 
-
     def cart(self):
         pass
 
     def profile(self):
-        pass
+        print('Profile')
+        print('-'*20)
+        print(f'Username: {self.user.username}')
+        options = ['Address','Payment', 'Back']
+        questions = [{
+                        'type':'list',
+                        'name': 'option',
+                        'message':'',
+                        'choices':options
+                    }]
+        answers = prompt(questions)
+        selection = answers['option']
+        if selection=='Back':
+            if self.user.role =='Customer':
+                self.customer_main_menu()
+            else:
+                self.seller_main_menu()
+        elif selection=='Address':
+            self._display_change_address()
+        elif selection=='Payment':
+            self._display_change_payment()
+
+    def _display_change_address(self):
+        clear_screen()
+        print('Address')
+        print('-'*20)
+        address = self.user.get_address()
+        print(f'Current Address: {address}')
+        options = ['Change Address']
+        questions = [{
+                        'type':'list',
+                        'name': 'option',
+                        'message':'',
+                        'choices':options
+                    }]
+        answers = prompt(questions)
+        if answers['option']=='Change Address':
+            bio_question = [
+                {
+                    'type': 'editor',
+                    'name': 'bio',
+                    'message': 'Please type in the following format -> Street, State, Postal (Esc+Enter to exit): ',
+                }
+            ]
+            bio_answers = prompt(bio_question)
+            try:
+                address = bio_answers['bio'].split(' ,')
+                if len(address)==3:
+                    street = address['street']
+                    state = address['state']
+                    postal = address['postal']
+                    self.user.change_address(street, state, postal)
+            except:
+                    print("Address wasn't changed!")
+            clear_screen()
+            self.profile()
+
+            
+    def _display_change_payment(self):
+        clear_screen()
+        address = self.user.get_payment()
+        print(f'Current Payment: {address}')
+        options = ['Change Payment']
+        questions = [{
+                        'type':'list',
+                        'name': 'option',
+                        'message':'',
+                        'choices':options
+                    }]
+        answers = prompt(questions)
+        if answers['option']=='Change Payment':
+            bio_question = [
+                {
+                    'type': 'editor',
+                    'name': 'bio',
+                    'message': 'Please your card details (Esc+Enter to exit): ',
+                }
+            ]
+            bio_answers = prompt(bio_question)
+            payment = bio_answers['bio']
+            self.user.change_payment(payment)
+            clear_screen()
+            self.profile()
+
     
     def view_sales(self):
         pass

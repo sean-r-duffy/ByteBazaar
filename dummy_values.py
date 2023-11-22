@@ -42,3 +42,8 @@ dummy_list_of_products = [
                         "product_id": 6
                     }
                     ]
+
+
+dummy_address = '123 Example Street, Testville, TX 78901, USA'
+
+dummy_payment = '3778-980-099-1123'
