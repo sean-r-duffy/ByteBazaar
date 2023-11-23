@@ -47,3 +47,19 @@ dummy_list_of_products = [
 dummy_address = '123 Example Street, Testville, TX 78901, USA'
 
 dummy_payment = '3778-980-099-1123'
+
+dummy_cart_products =[{
+                        "product_name": "Xiaomi 12S Ultra",
+                        "rating": 4.6,
+                        "description": "A great value phone with a powerful camera and long battery life",
+                        "price": 749,
+                        "product_id": 5
+                    },
+                    {
+                        "product_name": "iPhone 14",
+                        "rating": 4.9,
+                        "description": "The latest and greatest iPhone with a powerful processor and amazing camera",
+                        "price": 999,
+                        "product_id": 6
+                    }
+                    ]

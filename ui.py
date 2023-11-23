@@ -51,6 +51,16 @@ class User:
     def add_to_cart(self, product_id):
         self.db.add_product_to_cart(self.username,product_id)
 
+    def get_cart_products(self):
+        return self.db.get_user_cart(self.username)
+    
+    def remove_cart_product(self, product_id):
+        self.db.delete_cart_product(self.username, product_id)
+
+    def buy_products(self):
+        self.db.buy_user_products(self.username)
+        self.db.empty_cart(self.username)
+
     def get_address(self):
         return self.db.get_user_address(self.username)
 
@@ -69,6 +79,8 @@ class ECommerceApp:
 
     def start(self):
         clear_screen()
+        print('ByteBazaar')
+        print('-'*11)
         questions = [
             {
                 'type': 'list',
@@ -97,12 +109,15 @@ class ECommerceApp:
 
     def customer_main_menu(self):
         clear_screen()
+        print('Main Menu')
+        print('-'*20)
         options = ['View Products', 'Cart', 'Profile','Logout']
         questions = [
+            
             {
                 'type': 'list',
                 'name': 'main_menu',
-                'message': 'What would you like to do?',
+                'message': '',
                 'choices': options
             }
         ]
@@ -112,17 +127,19 @@ class ECommerceApp:
         elif answers['main_menu']=='View Products':
             self.view_products()
         elif answers['main_menu']=='Cart':
-            print('Cart')
+            self.cart()
         elif answers['main_menu']=='Profile':
             self.profile()
     def seller_main_menu(self):
         clear_screen()
+        print('Main Menu')
+        print('-'*20)
         options = ['Add Product', 'View Sales','Logout']
         questions = [
             {
                 'type': 'list',
                 'name': 'main_menu',
-                'message': 'What would you like to do?',
+                'message': '',
                 'choices': options
             }
         ]
@@ -140,7 +157,7 @@ class ECommerceApp:
         number_of_pages = len(list_of_products)
         def view_each_product(page_number):
             clear_screen()
-            print('Products:')
+            print('Products')
             print('-'*20)
             product = list_of_products[page_number]
             product_id = product['product_id']
@@ -160,6 +177,7 @@ class ECommerceApp:
             selection = answers['product_option']
             if selection =='Add to cart':
                 self.user.add_to_cart(product_id)
+                view_each_product(page_number)
             if selection =='Previous':
                 if page_number==0:
                     view_each_product(page_number)
@@ -183,7 +201,41 @@ class ECommerceApp:
 
 
     def cart(self):
-        pass
+        clear_screen()
+        print('Cart')
+        print('-'*20)
+        list_of_products = self.user.get_cart_products()
+        items_view_list = []
+        product_id_mapping = {}
+        for each_product in list_of_products:
+            product_name = each_product['product_name']
+            product_id = each_product['product_id']
+            product_price = str(each_product['price'])
+            items_view = 'Product Name: '+product_name+' | Price: '+product_price
+            items_view_list.append(items_view)
+            product_id_mapping[items_view]=product_id
+        questions = [
+                {
+                    'type': 'list',
+                    'name': 'choice',
+                    'message': 'Select the product you want to remove from cart',
+                    'choices': items_view_list + ['Buy', 'Back']
+                }
+            ]
+        answers = prompt(questions)
+        selection = answers['choice']
+
+        if selection=='Back':
+            if self.user.role =='Customer':
+                self.customer_main_menu()
+            else:
+                self.seller_main_menu()
+        elif selection=='Buy':
+            self.user.buy_products()
+            self.cart()
+        else:
+            self.user.remove_cart_product(product_id_mapping[selection])
+            self.cart()
 
     def profile(self):
         print('Profile')
