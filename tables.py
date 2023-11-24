@@ -6,7 +6,6 @@ import constants
 engine = create_engine(constants.DATABASE_URI, echo=True)
 
 
-# Base = declarative_base()
 class Base(DeclarativeBase):
     def insert(self):
         with Session(engine) as session:
