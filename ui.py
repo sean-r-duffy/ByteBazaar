@@ -77,6 +77,12 @@ class User:
     def change_payment(self, payment):
         return self.db.update_payment(self.username, payment)
     
+    def add_seller_product(self, product_name, product_category, product_description, product_price):
+        return self.db.add_product(product_name, product_category, product_description, product_price)
+    
+    def get_sales(self):
+        return self.db.get_seller_sales(self.username)
+    
 class ECommerceApp:
     def __init__(self):
         self.user = None
@@ -134,6 +140,7 @@ class ECommerceApp:
             self.cart()
         elif answers['main_menu']=='Profile':
             self.profile()
+
     def seller_main_menu(self):
         clear_screen()
         print('Main Menu')
@@ -151,9 +158,9 @@ class ECommerceApp:
         if answers['main_menu']=='Logout':
             self.logout()
         elif answers['main_menu']=='Add Product':
-            print('Add Products')
+            self.add_products()
         elif answers['main_menu']=='View Sales':
-            print('View Sales')
+            self.view_sales()
 
     def select_category(self):
         clear_screen()
@@ -171,6 +178,7 @@ class ECommerceApp:
         answers = prompt(questions)
         if answers['choice']:
             self.view_products(answers['choice'])
+
     def view_products(self,category):
         list_of_products = self.user.get_product_details(category)
         page_number = 0
@@ -344,11 +352,44 @@ class ECommerceApp:
 
     
     def view_sales(self):
-        pass
+        clear_screen()
+        print(f'Sales')
+        print('-'*20)
+        sales = self.user.get_sales()
+        for product_name, sale in sales.items():
+            print(f'Name: {product_name} | Sales: {sale}')
+        questions = [
+                {
+                    'type': 'list',
+                    'name': 'choice',
+                    'message': '',
+                    'choices': ['Back']
+                }
+            ]
+        answers = prompt(questions)
+        self.seller_main_menu()
 
-    def add_product(self):
-        pass
-    
+    def add_products(self):
+        clear_screen()
+        print(f'Add Product')
+        print('-'*20)
+        product_name = input('Name: ')
+        product_category = input('Category: ')
+        product_description = input('Description: ')
+        product_price = input('Price: ')
+        questions = [
+                    {
+                        'type': 'confirm',
+                        'message': 'Do you want to continue?',
+                        'name': 'continue',
+                        'default': True,
+                    }
+                    ]
+        answer = prompt(questions)
+        if answer['continue']:
+            self.user.add_seller_product(product_name, product_category, product_description, product_price)
+
+        self.seller_main_menu()
         
     def logout(self):
         exit()

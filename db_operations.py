@@ -53,3 +53,10 @@ class DataBase():
 
     def update_payment(self, username, payment):
         pass
+    
+    def add_product(self,product_name, product_category, product_description, product_price):
+        pass
+
+    def get_seller_sales(self,username):
+        sales = dummy_sales
+        return sales

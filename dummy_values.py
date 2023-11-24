@@ -65,3 +65,11 @@ dummy_cart_products =[{
                     ]
 
 dummy_categories = ["Electronics", "Clothing, Shoes & Jewelry", "Home & Kitchen", "Beauty & Personal Care", "Books", "Pet Supplies", "Sports & Outdoors"]
+
+dummy_sales = {
+    "Echo Dot": 15000,
+    "Kindle Paperwhite": 8000,
+    "Fire TV Stick": 12000,
+    "Amazon Basics USB Cable": 20000,
+    "Ring Video Doorbell": 5000
+}
