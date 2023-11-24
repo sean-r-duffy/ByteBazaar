@@ -1,16 +1,18 @@
 from PyInquirer import style_from_dict, Token
 
+
 def style():
     style = style_from_dict({
-    Token.Separator: '#cc5454',
-    Token.QuestionMark: '#7f7fff bold',
-    Token.Selected: '#5F819D',
-    Token.Pointer: '#5F819D bold',
-    Token.Instruction: '',
-    Token.Answer: '#5F819D bold',
-    Token.Question: '',
-})
+        Token.Separator: '#cc5454',
+        Token.QuestionMark: '#7f7fff bold',
+        Token.Selected: '#5F819D',
+        Token.Pointer: '#5F819D bold',
+        Token.Instruction: '',
+        Token.Answer: '#5F819D bold',
+        Token.Question: '',
+    })
     return style
+
 
 def logo():
     logo = '''
