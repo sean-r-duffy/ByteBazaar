@@ -294,7 +294,7 @@ class ECommerceApp:
         print('-'*20)
         address = self.user.get_address()
         print(f'Current Address: {address}')
-        options = ['Change Address']
+        options = ['Change Address', 'Back']
         questions = [{
                         'type':'list',
                         'name': 'option',
@@ -302,7 +302,9 @@ class ECommerceApp:
                         'choices':options
                     }]
         answers = prompt(questions)
-        if answers['option']=='Change Address':
+        if answers['option'] =='Back':
+            self.customer_main_menu()
+        elif answers['option']=='Change Address':
             bio_question = [
                 {
                     'type': 'editor',
@@ -328,7 +330,7 @@ class ECommerceApp:
         clear_screen()
         address = self.user.get_payment()
         print(f'Current Payment: {address}')
-        options = ['Change Payment']
+        options = ['Change Payment','Back']
         questions = [{
                         'type':'list',
                         'name': 'option',
@@ -336,7 +338,9 @@ class ECommerceApp:
                         'choices':options
                     }]
         answers = prompt(questions)
-        if answers['option']=='Change Payment':
+        if answers['option'] =='Back':
+            self.customer_main_menu()
+        elif answers['option']=='Change Payment':
             bio_question = [
                 {
                     'type': 'editor',
