@@ -44,8 +44,12 @@ class User:
             print("Registration successful!")
         return registration_response
     
-    def get_product_details(self):
-        product_details = self.db.get_products()
+    def get_product_categories(self):
+        categories = self.db.get_categories()
+        return categories
+    
+    def get_product_details(self,category):
+        product_details = self.db.get_products(category)
         return product_details
     
     def add_to_cart(self, product_id):
@@ -125,7 +129,7 @@ class ECommerceApp:
         if answers['main_menu']=='Logout':
             self.logout()
         elif answers['main_menu']=='View Products':
-            self.view_products()
+            self.select_category()
         elif answers['main_menu']=='Cart':
             self.cart()
         elif answers['main_menu']=='Profile':
@@ -151,8 +155,24 @@ class ECommerceApp:
         elif answers['main_menu']=='View Sales':
             print('View Sales')
 
-    def view_products(self):
-        list_of_products = self.user.get_product_details()
+    def select_category(self):
+        clear_screen()
+        print('Catgories')
+        print('-'*20)
+        options = self.user.get_product_categories()
+        questions = [
+            {
+                'type': 'list',
+                'name': 'choice',
+                'message': '',
+                'choices': options
+            }
+        ]
+        answers = prompt(questions)
+        if answers['choice']:
+            self.view_products(answers['choice'])
+    def view_products(self,category):
+        list_of_products = self.user.get_product_details(category)
         page_number = 0
         number_of_pages = len(list_of_products)
         def view_each_product(page_number):

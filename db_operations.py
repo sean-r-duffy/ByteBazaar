@@ -13,10 +13,13 @@ class DataBase():
         response= True
         return response
     
-    def get_products(self):
+    def get_products(self,category):
         products = dummy_list_of_products
         return products
 
+    def get_categories(self):
+        categories = dummy_categories
+        return categories
     def add_product_to_cart(self, username, product_id):
         response =True
         return response

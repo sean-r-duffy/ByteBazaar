@@ -63,3 +63,5 @@ dummy_cart_products =[{
                         "product_id": 6
                     }
                     ]
+
+dummy_categories = ["Electronics", "Clothing, Shoes & Jewelry", "Home & Kitchen", "Beauty & Personal Care", "Books", "Pet Supplies", "Sports & Outdoors"]
