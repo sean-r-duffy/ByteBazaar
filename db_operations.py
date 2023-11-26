@@ -27,7 +27,7 @@ class DataBase():
             response = in_buyer or in_seller
         return response
 
-    # TODO: Test
+    # TODO: Test, change ui code to work with product object (remove dict)
     def get_products(self, category):
         with Session(engine) as session:
             products = session.scalars(select(Product)
@@ -37,18 +37,32 @@ class DataBase():
         # products = dummy_list_of_products
         return products
 
+    # TODO: test
     def get_categories(self):
-        categories = dummy_categories
+        with Session(engine) as session:
+            categories = session.scalars(select(Category.name))
         return categories
 
+    # TODO: Test, and find exception for when foreign key can't be found
     def add_product_to_cart(self, username, product_id):
-        response = True
-        return response
+        cart = Cart(buyer_username=username, product_id=product_id)
+        try:
+            cart.insert()
+            response = True
+        except:
+            response = False
+        finally:
+            return response
 
+    # TODO: Test, and change handling to use cart object instead of dict
     def get_user_cart(self, username):
-        cart_products = dummy_cart_products
+        with Session(engine) as session:
+            cart_products = session.scalars(select(Cart)
+                                            .where(Cart.buyer_username == username))
+        # cart_products = dummy_cart_products
         return cart_products
 
+    # TODO: Adjust ui.py to handle multiple addresses per user
     def get_user_address(self, username):
         address = dummy_address
         return address
