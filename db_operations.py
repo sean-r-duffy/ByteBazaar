@@ -1,4 +1,6 @@
 from dummy_values import *
+from tables import *
+from sqlalchemy import select, exists
 
 
 class DataBase():
@@ -6,15 +8,33 @@ class DataBase():
         pass
 
     def register_user(self, role, username, password):
-        response = True
+        if role == 'Customer':
+            Buyer(username=username, password=password).insert()
+            response = True
+        elif role == 'Seller':
+            Seller(username=username, password=password).insert()
+            response = True
+        else:
+            response = False
         return response
 
     def authenticate_user(self, username, password):
-        response = True
+        with Session(engine) as session:
+            in_buyer = session.query(exists()
+                                     .where(Buyer.username == username, Buyer.password == password)).scalar()
+            in_seller = session.query(exists()
+                                      .where(Seller.username == username, Seller.password == password)).scalar()
+            response = in_buyer or in_seller
         return response
 
+    # TODO: Test
     def get_products(self, category):
-        products = dummy_list_of_products
+        with Session(engine) as session:
+            products = session.scalars(select(Product)
+                                       .join(Category, Product.category_id == Category.category_id)
+                                       .where(Category.name == category))
+        products = [x.__dict__ for x in products]
+        # products = dummy_list_of_products
         return products
 
     def get_categories(self):
@@ -49,7 +69,14 @@ class DataBase():
         payment = dummy_payment
         return dummy_payment
 
+    # TODO: Update with correct stored procedure name
     def update_address(self, username, street, state, postal):
+        """
+        with engine.connect() as connection:
+            connection.execute('CALL update_address(:username, :street, :state, :postal);',
+                               {'username': username, 'street': street, 'state': state, 'postal': postal})
+            connection.commit()
+        """
         pass
 
     def update_payment(self, username, payment):

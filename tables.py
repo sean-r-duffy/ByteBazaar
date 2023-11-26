@@ -3,11 +3,11 @@ from sqlalchemy.orm import mapped_column, DeclarativeBase, Session
 import mysql
 import constants
 
-engine = create_engine(constants.DATABASE_URI, echo=True)
+engine = create_engine(constants.DATABASE_URI, echo=constants.ECHO)
 
 
-# Base = declarative_base()
 class Base(DeclarativeBase):
+
     def insert(self):
         with Session(engine) as session:
             session.add(self)
@@ -120,7 +120,7 @@ class Buyer(Base):
     __tablename__ = 'buyer'
 
     buyer_id = mapped_column(Integer, primary_key=True)
-    name = mapped_column(String(50), nullable=False)
+    name = mapped_column(String(50))
     username = mapped_column(String(40))
     password = mapped_column(String(40))
 
