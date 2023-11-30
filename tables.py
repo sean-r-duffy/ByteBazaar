@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, Integer, String, Float, ForeignKey, DateTime, CheckConstraint
 from sqlalchemy.orm import mapped_column, DeclarativeBase, Session
-import mysql
+#import mysql
 import constants
 
 engine = create_engine(constants.DATABASE_URI, echo=constants.ECHO)

@@ -1,3 +1,4 @@
 mysql_connector_repackaged==0.3.1
 PyInquirer==1.0.3
 SQLAlchemy==2.0.22
+# TODO: add mysqlclient
