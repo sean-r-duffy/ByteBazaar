@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, Integer, String, Float, ForeignKey, DateTime, CheckConstraint
 from sqlalchemy.orm import mapped_column, DeclarativeBase, Session
-#import mysql
+# import mysql
+# import mysqlclient
 import constants
 
 engine = create_engine(constants.DATABASE_URI, echo=constants.ECHO)
@@ -109,7 +110,7 @@ class Sale(Base):
     __tablename__ = 'sale'
 
     sale_id = mapped_column(Integer, primary_key=True)
-    order_id = mapped_column(Integer, ForeignKey('order.order_id'))
+    shipment_id = mapped_column(Integer, ForeignKey('shipment.shipment_id'))
     product_id = mapped_column(Integer, ForeignKey('product.product_id'))
     quantity = mapped_column(Integer)
     datetime = mapped_column(DateTime)
@@ -142,10 +143,10 @@ class Address(Base):
     zip = mapped_column(Integer)
 
 
-class Order(Base):
-    __tablename__ = 'order'
+class Shipment(Base):
+    __tablename__ = 'shipment'
 
-    order_id = mapped_column(Integer, primary_key=True)
+    shipment_id = mapped_column(Integer, primary_key=True)
     address_id = mapped_column(Integer, ForeignKey('address.address_id'))
     buyer_username = mapped_column(String(40), ForeignKey('buyer.username'))
 
