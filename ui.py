@@ -192,11 +192,12 @@ class ECommerceApp:
             print('Products')
             print('-' * 20)
             product = list_of_products[page_number]
-            product_id = product['product_id']
-            print('Poduct Name: ', product['product_name'])
-            print('Rating: ', product['rating'])
-            print('Description: ', product['description'])
-            print('Price: ', product['price'])
+            product_id = product.product_id
+            print('Poduct Name: ', product.name)
+            # Displaying rating will require a new rating field and a trigger that updates it when a new review is made
+            # print('Rating: ', product['rating'])
+            print('Description: ', product.description)
+            print('Price: ', product.price)
             print('-' * 20)
             options = ['Add to cart', 'Previous', 'Next', 'Back']
             questions = [{
@@ -231,6 +232,7 @@ class ECommerceApp:
 
         view_each_product(page_number)
 
+    # TODO: Add quantity to items_view, may need a view in SQL of product + cart
     def cart(self):
         clear_screen()
         print('Cart')
@@ -239,9 +241,9 @@ class ECommerceApp:
         items_view_list = []
         product_id_mapping = {}
         for each_product in list_of_products:
-            product_name = each_product['product_name']
-            product_id = each_product['product_id']
-            product_price = str(each_product['price'])
+            product_name = each_product.name
+            product_id = each_product.product_id
+            product_price = str(each_product.price)
             items_view = 'Product Name: ' + product_name + ' | Price: ' + product_price
             items_view_list.append(items_view)
             product_id_mapping[items_view] = product_id

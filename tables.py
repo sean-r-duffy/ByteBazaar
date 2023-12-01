@@ -140,6 +140,7 @@ class Address(Base):
     street = mapped_column(String(50))
     city = mapped_column(String(50))
     state = mapped_column(String(50))
+    # TODO: require 5 digits
     zip = mapped_column(Integer)
 
 
