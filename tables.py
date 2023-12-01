@@ -1,13 +1,13 @@
 from sqlalchemy import create_engine, Integer, String, Float, ForeignKey, DateTime, CheckConstraint
 from sqlalchemy.orm import mapped_column, DeclarativeBase, Session
-import mysql
+#import mysql
 import constants
 
-engine = create_engine(constants.DATABASE_URI, echo=True)
+engine = create_engine(constants.DATABASE_URI, echo=constants.ECHO)
 
 
-# Base = declarative_base()
 class Base(DeclarativeBase):
+
     def insert(self):
         with Session(engine) as session:
             session.add(self)
@@ -90,7 +90,7 @@ class Platform(Base):
 class Cart(Base):
     __tablename__ = 'cart'
 
-    buyer_id = mapped_column(Integer, ForeignKey('buyer.buyer_id'), primary_key=True)
+    buyer_username = mapped_column(String(40), ForeignKey('buyer.username'), primary_key=True)
     product_id = mapped_column(Integer, ForeignKey('product.product_id'), primary_key=True)
     quantity = mapped_column(Integer)
 
@@ -98,7 +98,7 @@ class Cart(Base):
 class Review(Base):
     __tablename__ = 'review'
 
-    buyer_id = mapped_column(Integer, ForeignKey('buyer.buyer_id'), primary_key=True)
+    buyer_username = mapped_column(String(40), ForeignKey('buyer.username'), primary_key=True)
     product_id = mapped_column(Integer, ForeignKey('product.product_id'), primary_key=True)
     rating = mapped_column(Integer)
     text = mapped_column(String(1000))
@@ -119,9 +119,8 @@ class Sale(Base):
 class Buyer(Base):
     __tablename__ = 'buyer'
 
-    buyer_id = mapped_column(Integer, primary_key=True)
-    name = mapped_column(String(50), nullable=False)
-    username = mapped_column(String(40))
+    username = mapped_column(String(40), primary_key=True)
+    name = mapped_column(String(50))
     password = mapped_column(String(40))
 
 
@@ -129,14 +128,14 @@ class Payment(Base):
     __tablename__ = 'payment'
 
     card_number = mapped_column(Integer, primary_key=True)
-    buyer_id = mapped_column(Integer, ForeignKey('buyer.buyer_id'))
+    buyer_username = mapped_column(String(40), ForeignKey('buyer.username'))
 
 
 class Address(Base):
     __tablename__ = 'address'
 
     address_id = mapped_column(Integer, primary_key=True)
-    buyer_id = mapped_column(Integer, ForeignKey('buyer.buyer_id'))
+    buyer_username = mapped_column(String(40), ForeignKey('buyer.username'))
     street = mapped_column(String(50))
     city = mapped_column(String(50))
     state = mapped_column(String(50))
@@ -148,7 +147,7 @@ class Order(Base):
 
     order_id = mapped_column(Integer, primary_key=True)
     address_id = mapped_column(Integer, ForeignKey('address.address_id'))
-    buyer_id = mapped_column(Integer, ForeignKey('buyer.buyer_id'))
+    buyer_username = mapped_column(String(40), ForeignKey('buyer.username'))
 
 
 def create_schema():
