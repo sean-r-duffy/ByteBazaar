@@ -1,5 +1,7 @@
-from sqlalchemy import create_engine, Integer, String, Float, ForeignKey, DateTime, CheckConstraint
+from sqlalchemy import create_engine, Integer, String, Float, ForeignKey, DateTime, CheckConstraint, text
 from sqlalchemy.orm import mapped_column, DeclarativeBase, Session
+from sqlalchemy_utils.functions import database_exists, create_database
+import glob
 # import mysql
 # import mysqlclient
 import constants
@@ -152,4 +154,15 @@ class Shipment(Base):
 
 
 def create_schema():
-    Base.metadata.create_all(engine)
+    if not database_exists(constants.DATABASE_URI):
+        create_database(constants.DATABASE_URI)
+        Base.metadata.create_all(engine)
+
+        sql_scripts = glob.glob('SQL/Stored Procedures/*.sql')
+        sql_scripts.append('SQL/data.sql')
+
+        with Session(engine) as session:
+            for x in sql_scripts:
+                with open(x) as file:
+                    session.execute(text(file.read()))
+            session.commit()
