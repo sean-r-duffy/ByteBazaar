@@ -1,3 +1,4 @@
+-- TODO: Test
 -- List all products in a category
 CREATE PROCEDURE `byte_bazaar`.`search_products`(
 	IN p_category_id VARCHAR(50),
@@ -9,7 +10,7 @@ BEGIN
     FROM product AS p
     WHERE p.category_id = p_category_id;
     
-	  SELECT p.product_id, p.name
+	  SELECT *
     FROM product AS p
     WHERE p.category_id = p_category_id;
 END

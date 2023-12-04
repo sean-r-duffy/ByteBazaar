@@ -63,10 +63,10 @@ class DataBase():
     def get_user_address(self, username):
         with Session(engine) as session:
             addresses = session.scalars(select(Address).join(Buyer, Address.buyer_username == Buyer.username)
-                                      .where(Buyer.username == username))
+                                        .where(Buyer.username == username))
             addresses = [x for x in addresses]
         address = addresses[0]
-        zip = ('0' * (5-len(str(address.zip)))) + str(address.zip)
+        zip = ('0' * (5 - len(str(address.zip)))) + str(address.zip)
         address_string = address.street + ' ' + address.city + ', ' + address.state + ' ' + zip
         return address_string
 
@@ -93,15 +93,18 @@ class DataBase():
         payment = dummy_payment
         return dummy_payment
 
-    # TODO: Update with correct stored procedure name
-    def update_address(self, username, street, state, postal):
-        """
-        with engine.connect() as connection:
-            connection.execute('CALL update_address(:username, :street, :state, :postal);',
-                               {'username': username, 'street': street, 'state': state, 'postal': postal})
-            connection.commit()
-        """
-        pass
+    # TODO: Test, needs address_id field
+    def update_address(self, username, street, city, state, postal):
+
+        with Session(engine) as session:
+            address_id = session.execute(select(Address.address_id).where(Address.buyer_username == username))
+            session.execute(text('CALL byte_bazaar.change_address(:address_id, :street, :city, :state, :postal);',
+                                 {'address_id': address_id,
+                                  'street': street,
+                                  'city': city,
+                                  'state': state,
+                                  'postal': postal}))
+            session.commit()
 
     def update_payment(self, username, payment):
         pass

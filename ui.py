@@ -67,14 +67,16 @@ class User:
         self.db.buy_user_products(self.username)
         self.db.empty_cart(self.username)
 
+    # TODO: Test, needs to return address_id field
     def get_address(self):
         return self.db.get_user_address(self.username)
 
     def get_payment(self):
         return self.db.get_user_payment(self.username)
 
-    def change_address(self, street, state, postal):
-        return self.db.update_address(self.username, street, state, postal)
+    # TODO: Test, needs address_id field
+    def change_address(self, street, state, city, postal):
+        return self.db.update_address(self.username, street, city, state, postal)
 
     def change_payment(self, payment):
         return self.db.update_payment(self.username, payment)
@@ -314,17 +316,18 @@ class ECommerceApp:
                 {
                     'type': 'editor',
                     'name': 'bio',
-                    'message': 'Please type in the following format -> Street, State, Postal (Esc+Enter to exit): ',
+                    'message': 'Please type in the following format -> Street, State, City, Postal (Esc+Enter to exit): ',
                 }
             ]
             bio_answers = prompt(bio_question)
             try:
                 address = bio_answers['bio'].split(' ,')
                 if len(address) == 3:
-                    street = address['street']
-                    state = address['state']
-                    postal = address['postal']
-                    self.user.change_address(street, state, postal)
+                    street = address[0]
+                    state = address[1]
+                    city = address[2]
+                    postal = address[3]
+                    self.user.change_address(street, state, city, postal)
             except:
                 print("Address wasn't changed!")
             clear_screen()
