@@ -17,6 +17,7 @@ class User:
         self.password = None
         self.db = DataBase()
 
+    # TODO: add message and handling for when response == False
     def login(self):
         clear_screen()
         print(f'{self.role} Login')
@@ -51,8 +52,8 @@ class User:
         return categories
 
     def get_product_details(self, category):
-        product_details, ratings = self.db.get_products(category)
-        return product_details, ratings
+        product_details = self.db.get_products(category)
+        return product_details
 
     def add_to_cart(self, product_id):
         self.db.add_product_to_cart(self.username, product_id)
@@ -66,15 +67,14 @@ class User:
     def remove_cart_product(self, product_id):
         self.db.delete_cart_product(self.username, product_id)
 
-    def buy_products(self):
-        self.db.buy_user_products(self.username)
-        self.db.empty_cart(self.username)
+    def buy_products(self, address_id, card_number, promo_code):
+        self.db.buy_user_products(self.username, address_id, card_number, promo_code)
 
     def get_addresses(self):
         return self.db.get_user_addresses(self.username)
 
     def get_payment(self):
-        return self.db.get_user_payment(self.username)
+        return self.db.get_user_payments(self.username)
 
     def change_address(self, address_id, street, state, city, postal):
         return self.db.update_address(address_id, street, city, state, postal)
@@ -192,7 +192,7 @@ class ECommerceApp:
             self.view_products(answers['choice'])
 
     def view_products(self, category):
-        list_of_products, ratings = self.user.get_product_details(category)
+        list_of_products = self.user.get_product_details(category)
         page_number = 0
         number_of_pages = len(list_of_products)
 
@@ -202,13 +202,9 @@ class ECommerceApp:
             print('-' * 20)
             product = list_of_products[page_number]
             product_id = product.product_id
-            rating = ratings[page_number]
             print('Product Name: ', product.name)
-            # Displaying rating will require a new rating field and a trigger that updates it when a new review is made
-            # print('Rating: ', product['rating'])
             print('Description: ', product.description)
             print('Price: ', product.price)
-            print('Average rating: ' + str(rating))
             print('-' * 20)
             options = ['Add to cart', 'Previous', 'Next', 'Back']
             questions = [{
@@ -279,7 +275,11 @@ class ECommerceApp:
             else:
                 self.seller_main_menu()
         elif selection == 'Buy':
-            self.user.buy_products()
+            # TODO: Add chose address, choose payment, and enter promo code
+            address_id = 1
+            card_number = 1234567898761234
+            promo_code = None
+            self.user.buy_products(address_id, card_number, promo_code)
             self.cart()
         else:
             self.user.remove_cart_product(product_id_mapping[selection])
@@ -361,7 +361,8 @@ class ECommerceApp:
             clear_screen()
             self.profile()
 
-    # TODO: Adjust to handle multiple payments
+    # TODO: Adjust to handle multiple payments, adding, editing, deleting, payments
+    # TODO: Display cvv and exp date
     def _display_change_payment(self):
         clear_screen()
         address = self.user.get_payment()

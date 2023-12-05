@@ -13,7 +13,7 @@ class DataBase():
         else:
             role = 'seller'
         with Session(engine) as session:
-            session.execute(text('CALL new_buyer_or_seller(:name, :username, :password, :role)'),
+            session.execute(text('CALL new_buyer_or_seller(:name, :username, :password, :role, @success)'),
                             {'name': '', 'username': username, 'password': password, 'role': role})
             session.commit()
 
@@ -32,15 +32,16 @@ class DataBase():
         with Session(engine) as session:
             category_id = session.execute(select(Category.category_id)
                                           .where(Category.name == category)).scalar()
-            products = session.scalars(text('CALL byte_bazaar.search_products(:category_id);'),
-                                       {'category_id': category})
+            products = session.execute(text('CALL byte_bazaar.search_products(:category_id, @num_products);'),
+                                       {'category_id': category_id})
             products = [x for x in products]
-            avg_ratings = []
-            for product in products:
-                rating = session.scalar(text('SELECT avg_rating(:product_id)'),
-                                        {'product_id': product.product_id})
-                avg_ratings.append(rating)
-        return products, avg_ratings
+        return products
+
+    def get_rating(self, product_id):
+        with Session(engine) as session:
+            rating = session.scalar(text('SELECT avg_rating(:product_id)'),
+                                    {'product_id': product_id})
+        return rating
 
     def get_categories(self):
         with Session(engine) as session:
@@ -81,16 +82,20 @@ class DataBase():
             addresses = [x for x in addresses]
         return addresses
 
-    def buy_user_products(self, username, address_id, promo_code):
-        shipment = Shipment(address_id=address_id, buyer_username=username)
-        shipment.insert()
+    def buy_user_products(self, username, address_id, card_number, promo_code=None):
         with Session(engine) as session:
+            last_shipment_id = session.scalar(func.max(Shipment.shipment_id))
+            if last_shipment_id is None:
+                shipment_id = 1
+            else:
+                shipment_id = last_shipment_id + 1
             carts = session.scalars(select(Cart).where(Cart.buyer_username == username))
             for cart in carts:
-                sale = Sale(shipment_id=shipment.shipment_id, product_id=cart.product_id, quantity=cart.quantity,
+                sale = Sale(shipment_id=shipment_id, product_id=cart.product_id, quantity=cart.quantity,
                             datetime=func.now(), promo_code=promo_code)
-                session.delete(cart)
             session.commit()
+        shipment = Shipment(address_id=address_id, buyer_username=username, card_number=card_number)
+        shipment.insert()
         return True
 
     def delete_cart_product(self, username, product_id):

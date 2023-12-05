@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Integer, String, Float, ForeignKey, DateTime, CheckConstraint, text
+from sqlalchemy import create_engine, Integer, String, Float, ForeignKey, DateTime, CheckConstraint, text, BigInteger
 from sqlalchemy.orm import mapped_column, DeclarativeBase, Session
 from sqlalchemy_utils.functions import database_exists, create_database
 import glob
@@ -44,7 +44,7 @@ class Category(Base):
 class Image(Base):
     __tablename__ = 'image'
 
-    url = mapped_column(String(100), primary_key=True)
+    url = mapped_column(String(200), primary_key=True)
     product_id = mapped_column(Integer, ForeignKey('product.product_id'))
 
 
@@ -130,8 +130,11 @@ class Buyer(Base):
 class Payment(Base):
     __tablename__ = 'payment'
 
-    card_number = mapped_column(Integer, primary_key=True)
+    card_number = mapped_column(BigInteger, primary_key=True)
     buyer_username = mapped_column(String(40), ForeignKey('buyer.username'))
+    cvv = mapped_column(Integer)
+    exp_month = mapped_column(Integer)
+    exp_day = mapped_column(Integer)
 
 
 class Address(Base):
@@ -151,9 +154,10 @@ class Shipment(Base):
     shipment_id = mapped_column(Integer, primary_key=True)
     address_id = mapped_column(Integer, ForeignKey('address.address_id'))
     buyer_username = mapped_column(String(40), ForeignKey('buyer.username'))
+    card_number = mapped_column(BigInteger, ForeignKey('payment.card_number'))
 
 
-def create_schema():
+def initialize_db():
     if not database_exists(constants.DATABASE_URI):
         create_database(constants.DATABASE_URI)
         Base.metadata.create_all(engine)
@@ -162,6 +166,7 @@ def create_schema():
         functions = glob.glob('SQL/Functions/*.sql')
         views = 'SQL/views.sql'
         data = 'SQL/data.sql'
+        trigger = 'SQL/trigger.sql'
 
         with Session(engine) as session:
             for x in stored_procs:
@@ -173,6 +178,8 @@ def create_schema():
             with open(views) as file:
                 session.execute(text(file.read()))
             with open(data) as file:
+                session.execute(text(file.read()))
+            with open(trigger) as file:
                 session.execute(text(file.read()))
 
             session.commit()
