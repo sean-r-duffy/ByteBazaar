@@ -67,6 +67,7 @@ class User:
 
     def get_cart_products(self):
         return self.db.get_user_cart(self.username)
+
     def remove_cart_product(self, product_id):
         self.db.delete_cart_product(self.username, product_id)
 
@@ -273,7 +274,7 @@ class ECommerceApp:
         reviews_answer = prompt(reviews_options)
         selection = reviews_answer['reviews_option']
         if selection == 'View Reviews':
-            reviews = self.user.get_reviews(product_name, product_id) # Reviews list
+            reviews = self.user.get_reviews(product_id) # Reviews list
             self.view_reviews(reviews,product_name)
         elif selection =='Write Review':
             self.write_review(product_name, product_id)
@@ -357,16 +358,17 @@ class ECommerceApp:
         print('-' * 20)
         list_of_products = self.user.get_cart_products()
         cart_subtotal = self.user.get_cart_subtotal()
-        product_quantity = 1
         items_view_list = []
         product_id_mapping = {}
         len_of_products = len(list_of_products)
-        for current_product,each_product in enumerate(list_of_products):
-            product_name = each_product.name
-            product_id = each_product.product_id
-            product_price = str(each_product.price)
+        for current_product, item in enumerate(list_of_products):
+            product = item[0]
+            qty = item[1]
+            product_name = product.name
+            product_id = product.product_id
+            product_price = str(product.price)
             # TODO: Product quantity
-            items_view = 'Product Name: ' + product_name + ' | Price: ' + product_price + ' | Quantity: ' + str(product_quantity)
+            items_view = 'Product Name: ' + product_name + ' | Price: ' + product_price + ' | Quantity: ' + str(qty)
             items_view_list.append(items_view)
             if current_product==len_of_products-1:
                 items_view_list.append('-'*20)
@@ -397,18 +399,48 @@ class ECommerceApp:
             print('Buy')
             print('-' * 20)
             addresses = self.user.get_addresses() # Need key value pairs with address id: address
+            if not addresses:
+                print(f'No Address found. Please add new address')
+                options = ['Add New Address', 'Back']
+                questions = [{
+                    'type': 'list',
+                    'name': 'option',
+                    'message': '',
+                    'choices': options
+                }]
+                answers = prompt(questions)
+                selection = answers['option']
+                if selection == 'Back':
+                    self.profile()
+                else:
+                    self.add_new_address_window()
             address_prompt = [
                 {
                     'type': 'list',
                     'name': 'choice',
                     'message': 'Select the address: ',
-                    'choices': [{'name': [addr.street, addr.city, addr.state, addr.zip].join(', '), 'value': addr.address_id} for addr in addresses]
+                    'choices': [{'name': (', ').join([addr.street, addr.city, addr.state, str(addr.zip)]), 'value': addr.address_id} for addr in addresses]
                 }
             ]
 
             address_selection = prompt(address_prompt)
-            payment_methods = self.user.get_payment_methods()
             address_id = address_selection['choice']
+            payment_methods = self.user.get_payment_methods()
+            if not payment_methods:
+                options = ['Add New Payment Method', 'Back']
+                questions = [{
+                    'type': 'list',
+                    'name': 'option',
+                    'message': '',
+                    'choices': options
+                }]
+                answers = prompt(questions)
+                selection = answers['option']
+                if selection == 'Back':
+                    self.profile()
+                else:
+                    self.add_new_payment_method_window()
+
             payment_prompt = [
                 {
                     'type': 'list',
@@ -424,7 +456,7 @@ class ECommerceApp:
         else:
             self.user.remove_cart_product(product_id_mapping[selection])
             self.cart()
-    
+
 
     def profile(self):
         clear_screen()
@@ -472,6 +504,7 @@ class ECommerceApp:
             self.update_address()
         else:
             self.profile()
+
     def view_addresses(self):
         addresses = self.user.get_addresses()
         clear_screen()
@@ -493,7 +526,7 @@ class ECommerceApp:
                 self.add_new_address_window()
         else:
             for addr in addresses:
-                print([addr.street, addr.city, addr.state, addr.zip].join(', '))
+                print((', ').join([addr.street, addr.city, addr.state, str(addr.zip)]))
             options = ['Back']
             questions = [{
                 'type': 'list',
@@ -504,7 +537,7 @@ class ECommerceApp:
             answers = prompt(questions)
             selection = answers['review_option']
             self.profile()
-        
+
     def add_new_address_window(self):
         clear_screen()
         print(f'Add New Address')
@@ -518,13 +551,15 @@ class ECommerceApp:
         ]
         bio_answers = prompt(bio_question)
         try:
-            address = bio_answers['bio'].split(' ,')
-            if len(address) == 3:
+            address = bio_answers['bio'].split(', ')
+            if len(address) == 4:
                 street = address[0]
                 state = address[1]
                 city = address[2]
                 postal = address[3]
                 self.user.insert_address(street, city, state, postal)
+            else:
+                print(f'Address not entered')
         except:
             print("Address wasn't changed!")
         clear_screen()
@@ -555,7 +590,7 @@ class ECommerceApp:
                 'type': 'list',
                 'name': 'choice',
                 'message': 'Select the Address',
-                'choices': [{'name': [addr.street, addr.city, addr.state, addr.zip].join(', '), 'value': addr.address_id} for addr in addresses]
+                'choices': [{'name': (', ').join([addr.street, addr.city, addr.state, str(addr.zip)]), 'value': addr.address_id} for addr in addresses]
             }
         ]
         address_selection = prompt(address_prompt)
