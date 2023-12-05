@@ -176,3 +176,20 @@ class DataBase():
                                     {'username': username, 'role': 'seller'})
             sales = [x for x in sales]
         return sales
+
+    def get_reviews(self, product_id):
+        with Session(engine) as session:
+            reviews = session.scalars(select(Review).where(Review.product_id == product_id))
+            reviews = [x for x in reviews]
+        return reviews
+
+    def add_review(self, username, product_id, rating, description):
+        review = Review(buyer_username=username, product_id=product_id, rating=rating, text=description)
+        review.insert()
+        return True
+
+    def get_images(self, product_id):
+        with Session(engine) as session:
+            urls = session.scalars(select(Image.url).where(Image.product_id == product_id))
+            urls = [x for x in urls]
+        return urls
