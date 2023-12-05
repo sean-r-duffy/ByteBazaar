@@ -71,7 +71,7 @@ class User:
     def remove_cart_product(self, product_id):
         self.db.delete_cart_product(self.username, product_id)
 
-    def buy_products(self, address_id, card_number, promo_code):
+    def buy_products(self, address_id, card_number, promo_code=''):
         self.db.buy_user_products(self.username, address_id, card_number, promo_code)
 
     def get_reviews(self, product_id):
@@ -109,7 +109,6 @@ class User:
 
     def get_sales(self):
         return self.db.get_seller_sales(self.username)
-
 
 class ECommerceApp:
     def __init__(self):
@@ -361,6 +360,10 @@ class ECommerceApp:
         items_view_list = []
         product_id_mapping = {}
         len_of_products = len(list_of_products)
+        if len_of_products==0:
+            print(f'Please add products to cart')
+            time.sleep(2)
+            self.customer_main_menu()
         for current_product, item in enumerate(list_of_products):
             product = item[0]
             qty = item[1]
@@ -446,12 +449,12 @@ class ECommerceApp:
                     'type': 'list',
                     'name': 'choice',
                     'message': 'Select the payment method: ',
-                    'choices': [pymt.card_number for pymt in payment_methods]
+                    'choices': [str(pymt.card_number) for pymt in payment_methods]
                 }
             ]
             payment_selection = prompt(payment_prompt)
             payment_id = payment_selection['choice']
-            self.user.buy_products(address_id, payment_id)
+            self.user.buy_products(address_id, int(payment_id))
             self.cart()
         else:
             self.user.remove_cart_product(product_id_mapping[selection])
@@ -596,7 +599,7 @@ class ECommerceApp:
         address_selection = prompt(address_prompt)
         address_id = address_selection['choice']
         address_objs = next(addr for addr in addresses if addr.address_id== address_id)
-        selected_address = [address_objs.street, address_objs.city, address_objs.state, address_objs.zip].join(', ')
+        selected_address = ', '.join([address_objs.street, address_objs.city, address_objs.state,str(address_objs.zip)])
         clear_screen()
         print(f'Update Existing Address: {selected_address}')
         print('-'*20)
@@ -622,13 +625,16 @@ class ECommerceApp:
             bio_answers = prompt(bio_question)
             try:
                 address = bio_answers['bio'].split(' ,')
-                if len(address) == 3:
+                if len(address) == 4:
                     street = address[0]
                     state = address[1]
                     city = address[2]
                     postal = address[3]
-                    self.user.change_address(street, state, city, postal)
-            except:
+                    self.user.change_address(address_id, street, state, city, int(postal))
+                if bio_answers['bio']=='':
+                    self.user.delete_address(address_id)
+            except Exception as e:
+                print(e)
                 print("Address wasn't changed!")
             clear_screen()
             self.profile()
@@ -732,7 +738,7 @@ class ECommerceApp:
                 'type': 'list',
                 'name': 'choice',
                 'message': 'Select the Address',
-                'choices': [pymt.card_number for pymt in payment_methods]
+                'choices': [str(pymt.card_number) for pymt in payment_methods]
             }
         ]
         payment_selection = prompt(payment_prompt)
@@ -823,7 +829,17 @@ class ECommerceApp:
         print(f'Add Product')
         print('-' * 20)
         product_name = input('Name: ')
-        product_category = input('Category: ')
+        options = self.user.get_product_categories()
+        questions = [
+            {
+                'type': 'list',
+                'name': 'choice',
+                'message': 'Category: ',
+                'choices': options
+            }
+        ]
+        answers = prompt(questions)
+        product_category = answers['choice']
         product_description = input('Description: ')
         product_price = input('Price: ')
         questions = [
