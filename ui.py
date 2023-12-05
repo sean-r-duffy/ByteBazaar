@@ -3,6 +3,9 @@ from PyInquirer import prompt
 import getpass
 from db_operations import DataBase
 
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # from constants import style, logo
 
@@ -60,6 +63,12 @@ class User:
 
     def get_cart_products(self):
         return self.db.get_user_cart(self.username)
+    
+    def get_cart_subtotal(self):
+        return self.db.get_user_cart_subtotal(self.username)
+
+    def get_cart_subtotal(self):
+        return self.db.get_cart_subtotal(self.username)
 
     def get_cart_subtotal(self):
         return self.db.get_cart_subtotal(self.username)
@@ -70,9 +79,20 @@ class User:
     def buy_products(self, address_id, card_number, promo_code):
         self.db.buy_user_products(self.username, address_id, card_number, promo_code)
 
+    def get_reviews(self,product_name, product_id):
+        return self.db.get_product_reviews(product_id)
+
+    def enter_product_rating(self,rating, review):
+        self.db.insert_product_rating(self.username, rating, review)
+    # TODO: Test, needs to return address_id field
+    def get_address(self):
+        return self.db.get_user_address(self.username)
+
     def get_addresses(self):
         return self.db.get_user_addresses(self.username)
-
+    
+    def get_payment_methods(self):
+        return self.db.get_user_payment_methods(self.username)
     def get_payment(self):
         return self.db.get_user_payments(self.username)
 
@@ -206,7 +226,7 @@ class ECommerceApp:
             print('Description: ', product.description)
             print('Price: ', product.price)
             print('-' * 20)
-            options = ['Add to cart', 'Previous', 'Next', 'Back']
+            options = ['Reviews','Add to cart', 'Previous', 'Next', 'Back']
             questions = [{
                 'type': 'list',
                 'name': 'product_option',
@@ -215,23 +235,89 @@ class ECommerceApp:
             }]
             answers = prompt(questions)
             selection = answers['product_option']
-            if selection == 'Add to cart':
+            if selection=='Reviews':
+                self.reviews_selection(product.name, product_id)
+            elif selection == 'Add to cart':
                 self.user.add_to_cart(product_id)
                 view_each_product(page_number)
+            elif selection == 'Previous':
+                if page_number == 0:
+                    view_each_product(page_number)
+                else:
+                    page_number -= 1
+                    view_each_product(page_number)
+            elif selection == 'Next':
+                if page_number == number_of_pages - 1:
+                    view_each_product(page_number)
+                else:
+                    page_number += 1
+                    view_each_product(page_number)
+            else:
+                if self.user.role == 'Customer':
+                    self.customer_main_menu()
+                else:
+                    self.seller_main_menu()
+
+        view_each_product(page_number)
+
+    def reviews_selection(self, product_name, product_id):
+        clear_screen()
+        print(f'Reviews: {product_name}')
+        print('-' * 20)
+        options = ['View Reviews','Write Review', 'Back']
+        reviews_options = [{
+            'type': 'list',
+            'name': 'reviews_option',
+            'message': '',
+            'choices': options
+        }]
+        reviews_answer = prompt(reviews_options)
+        selection = reviews_answer['reviews_option']
+        if selection == 'View Reviews':
+            reviews = self.user.get_reviews(product_name, product_id) # Reviews list
+            self.view_reviews(reviews,product_name)
+        elif selection =='Write Review':
+            self.write_review(product_name, product_id)
+
+    def view_reviews(self, reviews, product_name):
+        page_number = 0
+        if not reviews:
+            reviews = ['']
+        number_of_pages = len(reviews)
+        def view_each_product(page_number):
+            clear_screen()
+            print(f'Reviews: {product_name}')
+            print('-' * 20)
+            review = reviews[page_number]
+            print(review)
+            # print('Poduct Name: ', product.name)
+            # # Displaying rating will require a new rating field and a trigger that updates it when a new review is made
+            # # print('Rating: ', product['rating'])
+            # print('Description: ', product.description)
+            # print('Price: ', product.price)
+            print('-' * 20)
+            options = ['Previous', 'Next', 'Back']
+            questions = [{
+                'type': 'list',
+                'name': 'review_option',
+                'message': '',
+                'choices': options
+            }]
+            answers = prompt(questions)
+            selection = answers['review_option']
             if selection == 'Previous':
                 if page_number == 0:
                     view_each_product(page_number)
                 else:
                     page_number -= 1
                     view_each_product(page_number)
-
-            if selection == 'Next':
+            elif selection == 'Next':
                 if page_number == number_of_pages - 1:
                     view_each_product(page_number)
                 else:
                     page_number += 1
                     view_each_product(page_number)
-            if selection == 'Back':
+            else:
                 if self.user.role == 'Customer':
                     self.customer_main_menu()
                 else:
@@ -240,55 +326,88 @@ class ECommerceApp:
 
         view_each_product(page_number)
 
+    # TODO: Add quantity to items_view, may need a view in SQL of product + cart
     def cart(self):
         clear_screen()
-        subtotal = self.user.get_cart_subtotal()
-        print('Cart')
-        print('Total: $' + str(subtotal))
+        print('Cart (Select the product you want to remove from cart)')
         print('-' * 20)
         list_of_products = self.user.get_cart_products()
+        cart_subtotal = self.user.get_cart_subtotal()
+        product_quantity = 1
         items_view_list = []
         product_id_mapping = {}
-        for x in list_of_products:
-            product = x[0]
-            qty = x[1]
-            product_name = product.name
-            product_id = product.product_id
-            product_price = str(product.price)
-            items_view = 'Product Name: ' + product_name + ' | Price: ' + product_price + ' | Qty: ' + str(qty)
+        len_of_products = len(list_of_products)
+        for current_product,each_product in enumerate(list_of_products):
+            product_name = each_product.name
+            product_id = each_product.product_id
+            product_price = str(each_product.price)
+            # TODO: Product quantity
+            items_view = 'Product Name: ' + product_name + ' | Price: ' + product_price + ' | Quantity: ' + str(product_quantity)
             items_view_list.append(items_view)
+            if current_product==len_of_products-1:
+                items_view_list.append('-'*20)
+                items_view_list.append(f'Total: $.{cart_subtotal}')
+                items_view_list.append('-'*20)
             product_id_mapping[items_view] = product_id
         questions = [
             {
                 'type': 'list',
                 'name': 'choice',
-                'message': 'Select the product you want to remove from cart',
+                'message': '',
                 'choices': items_view_list + ['Buy', 'Back']
             }
         ]
         answers = prompt(questions)
         selection = answers['choice']
-
-        if selection == 'Back':
+        if '-'*20 == selection:
+            self.cart()
+        elif 'Total: $.' in selection:
+            self.cart()
+        elif selection == 'Back':
             if self.user.role == 'Customer':
                 self.customer_main_menu()
             else:
                 self.seller_main_menu()
         elif selection == 'Buy':
-            # TODO: Add chose address, choose payment, and enter promo code
-            address_id = 1
-            card_number = 1234567898761234
-            promo_code = None
-            self.user.buy_products(address_id, card_number, promo_code)
+            clear_screen()
+            print('Buy')
+            print('-' * 20)
+            addresses = self.user.get_addresses() # Need key value pairs with address id: address
+            address_prompt = [
+                {
+                    'type': 'list',
+                    'name': 'choice',
+                    'message': 'Select the address: ',
+                    'choices': [{'name': addr['address'], 'value': addr['id']} for addr in addresses]
+                }
+            ]
+
+            address_selection = prompt(address_prompt)
+            payment_methods = self.user.get_payment_methods()
+            address_id = address_selection['choice']
+            payment_prompt = [
+                {
+                    'type': 'list',
+                    'name': 'choice',
+                    'message': 'Select the payment method: ',
+                    'choices': [{'name': pymt['card_number'], 'value': pymt['card_id']} for pymt in payment_methods]
+                }
+            ]
+            payment_selection = prompt(payment_prompt)
+            payment_id = payment_selection['choice']
+            self.user.buy_products(address_id, payment_id)
             self.cart()
         else:
             self.user.remove_cart_product(product_id_mapping[selection])
             self.cart()
+    
 
     def profile(self):
+        clear_screen()
         print('Profile')
         print('-' * 20)
         print(f'Username: {self.user.username}')
+        # TODO: Handle error
         options = ['Address', 'Payment', 'Back']
         questions = [{
             'type': 'list',
@@ -312,14 +431,116 @@ class ECommerceApp:
         clear_screen()
         print('Address')
         print('-' * 20)
-        addresses = self.user.get_addresses()
-        if len(addresses) == 0:
-            print('No addresses saved')
+        options = ['View Addresses','Add New Address', 'Update Existing Address','Back']
+        questions = [{
+            'type': 'list',
+            'name': 'choice',
+            'message': '',
+            'choices': options
+        }]
+        answer = prompt(questions)
+        selection = answer['choice']
+        if selection == 'View Addresses':
+            self.view_addresses()
+        elif selection =='Add New Address':
+            self.add_new_address_window()
+        elif selection =='Update Existing Address':
+            self.update_address()
         else:
-            print('Select address to edit')
-        options = [f'{x.street}, {x.state}, {x.city} {x.zip}' for x in addresses]
-        options.append('Add Address')
-        options.append('Back')
+            self.profile()
+    def view_addresses(self):
+        addresses = self.user.get_addresses()
+        clear_screen()
+        print(f'Address')
+        print('-'*20)
+        if not addresses:
+            options = ['Add New Address','Back']
+            questions = [{
+                'type': 'list',
+                'name': 'option',
+                'message': '',
+                'choices': options
+            }]
+            answers = prompt(questions)
+            selection = answers['option']
+            if selection=='Back':
+                self.profile()
+            else:
+                self.add_new_address_window()
+        else:
+            for address in addresses:
+                print(address['address'])
+            options = ['Back']
+            questions = [{
+                'type': 'list',
+                'name': 'review_option',
+                'message': '',
+                'choices': options
+            }]
+            answers = prompt(questions)
+            selection = answers['review_option']
+            self.profile()
+        
+    def add_new_address_window(self):
+        clear_screen()
+        print(f'Add New Address')
+        print('-'*20)
+        bio_question = [
+            {
+                'type': 'editor',
+                'name': 'bio',
+                'message': 'Please type in the following format -> Street, State, City, Postal (Esc+Enter to exit): ',
+            }
+        ]
+        bio_answers = prompt(bio_question)
+        try:
+            address = bio_answers['bio'].split(' ,')
+            if len(address) == 3:
+                street = address[0]
+                state = address[1]
+                city = address[2]
+                postal = address[3]
+                self.user.add_new_address(street, state, city, postal)
+        except:
+            print("Address wasn't changed!")
+        clear_screen()
+        self.profile()
+
+
+    def update_address(self):
+        clear_screen()
+        print(f'Update Existing Address')
+        print('-'*20)
+        addresses = self.user.get_addresses()
+        if not addresses:
+            options = ['Add New Address','Back']
+            questions = [{
+                'type': 'list',
+                'name': 'review_option',
+                'message': '',
+                'choices': options
+            }]
+            answers = prompt(questions)
+            selection = answers['review_option']
+            if selection=='Back':
+                self.profile()
+            else:
+                self.add_new_address_window()
+        address_prompt = [
+            {
+                'type': 'list',
+                'name': 'choice',
+                'message': 'Select the Address',
+                'choices': [{'name': addr['address'], 'value': addr['id']} for addr in addresses]
+            }
+        ]
+        address_selection = prompt(address_prompt)
+        address_id = address_selection['choice']
+        selected_address = next(addr for addr in addresses if addr['id'] == address_id)['address']
+        clear_screen()
+        print(f'Update Existing Address: {selected_address}')
+        print('-'*20)
+        options = ['Change Address', 'Back']
         questions = [{
             'type': 'list',
             'name': 'option',
@@ -329,13 +550,7 @@ class ECommerceApp:
         answers = prompt(questions)
         if answers['option'] == 'Back':
             self.customer_main_menu()
-        elif answers['option'] == 'Add Address':
-            # TODO: add address
-            # self.user.insert_address(street, city, state, postal)
-            pass
-        else:
-            address = addresses[options.index(answers['option'])]
-            address_id = address.address_id
+        elif answers['option'] == 'Change Address':
             bio_question = [
                 {
                     'type': 'editor',
@@ -345,19 +560,16 @@ class ECommerceApp:
                 }
             ]
             bio_answers = prompt(bio_question)
-            if bio_answers['bio'] == '':
-                self.user.delete_address(address_id)
-            else:
-                try:
-                    address_list = bio_answers['bio'].split(' ,')
-                    if len(address_list) == 3:
-                        street = address_list[0]
-                        state = address_list[1]
-                        city = address_list[2]
-                        postal = address_list[3]
-                        self.user.change_address(address_id, street, state, city, postal)
-                except:
-                    print("Address wasn't changed!")
+            try:
+                address = bio_answers['bio'].split(' ,')
+                if len(address) == 3:
+                    street = address[0]
+                    state = address[1]
+                    city = address[2]
+                    postal = address[3]
+                    self.user.change_address(street, state, city, postal)
+            except:
+                print("Address wasn't changed!")
             clear_screen()
             self.profile()
 
@@ -365,9 +577,111 @@ class ECommerceApp:
     # TODO: Display cvv and exp date
     def _display_change_payment(self):
         clear_screen()
-        address = self.user.get_payment()
-        print(f'Current Payment: {address}')
-        options = ['Change Payment', 'Back']
+        print(f'Payment')
+        print('-'*20)
+        options = ['View Payment Method','Add New Payment Method', 'Update Existing Payment Method','Back']
+        questions = [{
+            'type': 'list',
+            'name': 'choice',
+            'message': '',
+            'choices': options
+        }]
+        answer = prompt(questions)
+        selection = answer['choice']
+        if selection == 'View Payment Method':
+            self.view_payment_methods()
+        elif selection =='Add New Payment Method':
+            self.add_new_payment_method_window()
+        elif selection =='Update Existing Payment Method':
+            self.update_existing_payment_methods()
+        else:
+            self.profile()
+
+    def view_payment_methods(self):
+        payments = self.user.get_payment_methods()
+        clear_screen()
+        print(f'Payment Methods')
+        print('-'*20)
+        if not payments:
+            options = ['Add New Payment Method','Back']
+            questions = [{
+                'type': 'list',
+                'name': 'option',
+                'message': '',
+                'choices': options
+            }]
+            answers = prompt(questions)
+            selection = answers['option']
+            if selection=='Back':
+                self.profile()
+            else:
+                self.add_new_payment_method_window()
+        else:
+            for payment in payments:
+                print(payment['card_number'])
+            options = ['Back']
+            questions = [{
+                'type': 'list',
+                'name': 'review_option',
+                'message': '',
+                'choices': options
+            }]
+            answers = prompt(questions)
+            selection = answers['review_option']
+            self.profile()
+
+    def add_new_payment_method_window(self):
+        clear_screen()
+        print(f'Add New Payment Method')
+        print('-'*20)
+        bio_question = [
+            {
+                'type': 'editor',
+                'name': 'bio',
+                'message': 'Please your card details (Esc+Enter to exit): ',
+            }
+        ]
+        bio_answers = prompt(bio_question)
+        payment = bio_answers['bio']
+        self.user.change_payment(payment)
+        clear_screen()
+        self.profile()
+
+
+    def update_existing_payment_methods(self):
+        clear_screen()
+        print(f'Update Existing Payment Method')
+        print('-'*20)
+        payment_methods = self.user.get_payment_methods()
+        if not payment_methods:
+            options = ['Add New Payment Method','Back']
+            questions = [{
+                'type': 'list',
+                'name': 'review_option',
+                'message': '',
+                'choices': options
+            }]
+            answers = prompt(questions)
+            selection = answers['review_option']
+            if selection=='Back':
+                self.profile()
+            else:
+                self.add_new_payment_method_window()
+        payment_prompt = [
+            {
+                'type': 'list',
+                'name': 'choice',
+                'message': 'Select the Address',
+                'choices': [{'name': pymt['card_number'], 'value': pymt['card_id']} for pymt in payment_methods]
+            }
+        ]
+        payment_selection = prompt(payment_prompt)
+        payment_id = payment_selection['choice']
+        selected_payment = next(pymt for pymt in payment_methods if pymt['card_id'] == payment_id)['card_number']
+        clear_screen()
+        print(f'Update Existing Payment Method: {selected_payment}')
+        print('-'*20)
+        options = ['Change Payment Method', 'Back']
         questions = [{
             'type': 'list',
             'name': 'option',
@@ -377,7 +691,7 @@ class ECommerceApp:
         answers = prompt(questions)
         if answers['option'] == 'Back':
             self.customer_main_menu()
-        elif answers['option'] == 'Change Payment':
+        elif answers['option'] == 'Change Payment Method':
             bio_question = [
                 {
                     'type': 'editor',
@@ -403,12 +717,46 @@ class ECommerceApp:
                 'type': 'list',
                 'name': 'choice',
                 'message': '',
-                'choices': ['Back']
+                'choices': ['Visualize Sales', 'Visualize Sales By Month','Back']
             }
         ]
         answers = prompt(questions)
-        self.seller_main_menu()
+        if answers['choice']=='Visualize Sales':
+            self._barplot(sales)
 
+        elif answers['choice']=='Visualize Sales By Month':
+            self._lineplot(sales)
+        else:
+            self.seller_main_menu()
+
+
+
+    def _barplot(self,sales):
+        df = pd.DataFrame(list(sales.items()), columns=['product', 'sales'])
+
+        sns.set(style="whitegrid")
+        plt.figure(figsize=(10, 6))
+        sns.barplot(x='product', y='sales', data=df, palette="viridis")
+        plt.title('Sales by Product')
+        plt.xlabel('Product')
+        plt.ylabel('Sales')
+        plt.xticks(rotation=45)
+        plt.show(block=True)
+        self.view_sales()
+
+
+    def _lineplot(self,sales):
+        df = pd.DataFrame(list(sales.items()), columns=['product', 'sales'])
+
+        sns.set(style="whitegrid")
+        plt.figure(figsize=(10, 6))
+        sns.lineplot(x='product', y='sales', data=df, marker='o', palette="viridis")
+        plt.title('Sales by Product Per Month')
+        plt.xlabel('Product')
+        plt.ylabel('Sales')
+        plt.show(block=True)
+        self.view_sales()
+        
     def add_products(self):
         clear_screen()
         print(f'Add Product')
