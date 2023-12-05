@@ -59,6 +59,10 @@ class DataBase():
             list_of_products = [x for x in cart_products]
         return list_of_products
 
+
+    def get_user_cart_subtotal(self,username):
+        return dummy_subtotal
+
     # TODO: Adjust ui.py to handle multiple addresses per user, add address if none are in system
     def get_user_address(self, username):
         with Session(engine) as session:
@@ -69,11 +73,21 @@ class DataBase():
         zip = ('0' * (5 - len(str(address.zip)))) + str(address.zip)
         address_string = address.street + ' ' + address.city + ', ' + address.state + ' ' + zip
         return address_string
-
-    def buy_user_products(self, username):
+        
+    def get_user_addresses(self,username):
+        return dummy_addresses
+    
+    def add_user_address(self,username, street, city, state, postal):
+        respose = True
+        return respose
+    def buy_user_products(self, username,address_id, payment_id):
         response = True
         return response
-
+    
+    def get_product_reviews(self,product_id):
+        return dummy_reviews
+    def insert_product_rating(self,username, rating, review):
+        pass
     def delete_cart_product(self, username, product_id):
         with Session(engine) as session:
             cart = session.execute(select(Cart).where(Cart.buyer_username == username,
@@ -89,23 +103,26 @@ class DataBase():
         response = True
         return response
 
+    def get_user_payment_methods(self,username):
+        payment_methods = dummy_payment_methods
+        return payment_methods
     def get_user_payment(self, username):
         payment = dummy_payment
         return dummy_payment
 
     # TODO: Test, needs address_id field
-    def update_address(self, username, street, city, state, postal):
+    def update_address(self,address_id, username, street, city, state, postal):
 
-        with Session(engine) as session:
-            address_id = session.execute(select(Address.address_id).where(Address.buyer_username == username))
-            session.execute(text('CALL byte_bazaar.change_address(:address_id, :street, :city, :state, :postal);',
-                                 {'address_id': address_id,
-                                  'street': street,
-                                  'city': city,
-                                  'state': state,
-                                  'postal': postal}))
-            session.commit()
-
+        # with Session(engine) as session:
+        #     address_id = session.execute(select(Address.address_id).where(Address.buyer_username == username))
+        #     session.execute(text('CALL byte_bazaar.change_address(:address_id, :street, :city, :state, :postal);',
+        #                          {'address_id': address_id,
+        #                           'street': street,
+        #                           'city': city,
+        #                           'state': state,
+        #                           'postal': postal}))
+        #     session.commit()
+        pass
     def update_payment(self, username, payment):
         pass
 
