@@ -145,9 +145,9 @@ class DataBase():
         address.insert()
         return True
 
-    def delete_payment(self, card_number):
+    def delete_payment(self, old_card_number):
         with Session(engine) as session:
-            payment = session.execute(select(Payment).where(Payment.card_number == card_number)).scalar()
+            payment = session.execute(select(Payment).where(Payment.card_number == old_card_number)).scalar()
         payment.delete()
         return True
 
@@ -156,9 +156,9 @@ class DataBase():
         payment.insert()
         return True
 
-    def update_payment(self, username, card_number):
-        self.delete_payment(card_number)
-        self.insert_payment(username, card_number)
+    def update_payment(self, username, old_card_number, new_card_number):
+        self.delete_payment(old_card_number)
+        self.insert_payment(username, new_card_number)
 
     def add_product(self, product_name, product_category, product_description, product_price):
         with Session(engine) as session:
@@ -176,7 +176,7 @@ class DataBase():
 
     def get_seller_sales(self, username):
         with Session(engine) as session:
-            sales = session.scalars(text('CALL byte_bazaar.show_prev_orders(:username, :role)'),
+            sales = session.execute(text('CALL byte_bazaar.show_prev_orders(:username, :role)'),
                                     {'username': username, 'role': 'seller'})
             sales = [x for x in sales]
         return sales

@@ -1,4 +1,5 @@
 import os
+import time
 from PyInquirer import prompt
 import getpass
 from db_operations import DataBase
@@ -61,38 +62,29 @@ class User:
     def add_to_cart(self, product_id):
         self.db.add_product_to_cart(self.username, product_id)
 
+    def get_cart_subtotal(self):
+        return self.db.get_cart_subtotal(self.username)
+
     def get_cart_products(self):
         return self.db.get_user_cart(self.username)
-    
-    def get_cart_subtotal(self):
-        return self.db.get_user_cart_subtotal(self.username)
-
-    def get_cart_subtotal(self):
-        return self.db.get_cart_subtotal(self.username)
-
-    def get_cart_subtotal(self):
-        return self.db.get_cart_subtotal(self.username)
-
     def remove_cart_product(self, product_id):
         self.db.delete_cart_product(self.username, product_id)
 
     def buy_products(self, address_id, card_number, promo_code):
         self.db.buy_user_products(self.username, address_id, card_number, promo_code)
 
-    def get_reviews(self,product_name, product_id):
-        return self.db.get_product_reviews(product_id)
+    def get_reviews(self, product_id):
+        return self.db.get_reviews(product_id)
 
-    def enter_product_rating(self,rating, review):
-        self.db.insert_product_rating(self.username, rating, review)
-    # TODO: Test, needs to return address_id field
-    def get_address(self):
-        return self.db.get_user_address(self.username)
+    def enter_product_rating(self,product_id, rating, description):
+        self.db.add_review(self.username, product_id, rating, description)
 
     def get_addresses(self):
         return self.db.get_user_addresses(self.username)
     
     def get_payment_methods(self):
-        return self.db.get_user_payment_methods(self.username)
+        return self.db.get_user_payments(self.username)
+
     def get_payment(self):
         return self.db.get_user_payments(self.username)
 
@@ -105,8 +97,11 @@ class User:
     def insert_address(self, street, city, state, postal):
         return self.db.insert_address(self.username, street, city, state, postal)
 
-    def change_payment(self, payment):
-        return self.db.update_payment(self.username, payment)
+    def change_payment(self,old_card_number, new_card_number):
+        return self.db.update_payment(self.username, old_card_number, new_card_number)
+
+    def add_new_payment(self,payment):
+        return self.db.insert_payment(self.username, payment)
 
     def add_seller_product(self, product_name, product_category, product_description, product_price):
         return self.db.add_product(product_name, product_category, product_description, product_price)
@@ -148,6 +143,10 @@ class ECommerceApp:
                     self.customer_main_menu()
                 else:
                     self.seller_main_menu()
+            else:
+                print(f'Incorrect Username/ Password')
+                time.sleep(2)
+                self.start()
 
     def customer_main_menu(self):
         clear_screen()
@@ -279,16 +278,41 @@ class ECommerceApp:
         elif selection =='Write Review':
             self.write_review(product_name, product_id)
 
+    def write_review(self, product_name, product_id):
+        clear_screen()
+        print(f'Write Review: {product_name}')
+        print('-' * 20)
+        options = ['1','2','3','4','5']
+        rating_questions = [{
+            'type': 'list',
+            'name': 'rating_option',
+            'message': 'Please provide a rating',
+            'choices': options
+        }]
+        rating_answers = prompt(rating_questions)
+        rating = rating_answers['rating_option']
+        write_review_quesstion = [
+                        {
+                            'type': 'editor',
+                            'name': 'bio',
+                            'message': 'Please Write the review (Esc+Enter to exit): ',
+                        }
+                    ]
+        bio_answers = prompt(write_review_quesstion)
+        review = bio_answers['bio']
+        self.user.enter_product_rating(product_id, int(rating), review)
+        self.customer_main_menu()
+    
     def view_reviews(self, reviews, product_name):
         page_number = 0
         if not reviews:
             reviews = ['']
         number_of_pages = len(reviews)
-        def view_each_product(page_number):
+        def view_each_review(page_number):
             clear_screen()
             print(f'Reviews: {product_name}')
             print('-' * 20)
-            review = reviews[page_number]
+            review = reviews[page_number].text
             print(review)
             # print('Poduct Name: ', product.name)
             # # Displaying rating will require a new rating field and a trigger that updates it when a new review is made
@@ -307,16 +331,16 @@ class ECommerceApp:
             selection = answers['review_option']
             if selection == 'Previous':
                 if page_number == 0:
-                    view_each_product(page_number)
+                    view_each_review(page_number)
                 else:
                     page_number -= 1
-                    view_each_product(page_number)
+                    view_each_review(page_number)
             elif selection == 'Next':
                 if page_number == number_of_pages - 1:
-                    view_each_product(page_number)
+                    view_each_review(page_number)
                 else:
                     page_number += 1
-                    view_each_product(page_number)
+                    view_each_review(page_number)
             else:
                 if self.user.role == 'Customer':
                     self.customer_main_menu()
@@ -324,7 +348,7 @@ class ECommerceApp:
                     self.seller_main_menu()
                     self.seller_main_menu()
 
-        view_each_product(page_number)
+        view_each_review(page_number)
 
     # TODO: Add quantity to items_view, may need a view in SQL of product + cart
     def cart(self):
@@ -378,7 +402,7 @@ class ECommerceApp:
                     'type': 'list',
                     'name': 'choice',
                     'message': 'Select the address: ',
-                    'choices': [{'name': addr['address'], 'value': addr['id']} for addr in addresses]
+                    'choices': [{'name': [addr.street, addr.city, addr.state, addr.zip].join(', '), 'value': addr.address_id} for addr in addresses]
                 }
             ]
 
@@ -390,7 +414,7 @@ class ECommerceApp:
                     'type': 'list',
                     'name': 'choice',
                     'message': 'Select the payment method: ',
-                    'choices': [{'name': pymt['card_number'], 'value': pymt['card_id']} for pymt in payment_methods]
+                    'choices': [pymt.card_number for pymt in payment_methods]
                 }
             ]
             payment_selection = prompt(payment_prompt)
@@ -468,8 +492,8 @@ class ECommerceApp:
             else:
                 self.add_new_address_window()
         else:
-            for address in addresses:
-                print(address['address'])
+            for addr in addresses:
+                print([addr.street, addr.city, addr.state, addr.zip].join(', '))
             options = ['Back']
             questions = [{
                 'type': 'list',
@@ -500,7 +524,7 @@ class ECommerceApp:
                 state = address[1]
                 city = address[2]
                 postal = address[3]
-                self.user.add_new_address(street, state, city, postal)
+                self.user.insert_address(street, city, state, postal)
         except:
             print("Address wasn't changed!")
         clear_screen()
@@ -531,12 +555,13 @@ class ECommerceApp:
                 'type': 'list',
                 'name': 'choice',
                 'message': 'Select the Address',
-                'choices': [{'name': addr['address'], 'value': addr['id']} for addr in addresses]
+                'choices': [{'name': [addr.street, addr.city, addr.state, addr.zip].join(', '), 'value': addr.address_id} for addr in addresses]
             }
         ]
         address_selection = prompt(address_prompt)
         address_id = address_selection['choice']
-        selected_address = next(addr for addr in addresses if addr['id'] == address_id)['address']
+        address_objs = next(addr for addr in addresses if addr.address_id== address_id)
+        selected_address = [address_objs.street, address_objs.city, address_objs.state, address_objs.zip].join(', ')
         clear_screen()
         print(f'Update Existing Address: {selected_address}')
         print('-'*20)
@@ -618,7 +643,7 @@ class ECommerceApp:
                 self.add_new_payment_method_window()
         else:
             for payment in payments:
-                print(payment['card_number'])
+                print(payment.card_number)
             options = ['Back']
             questions = [{
                 'type': 'list',
@@ -643,7 +668,7 @@ class ECommerceApp:
         ]
         bio_answers = prompt(bio_question)
         payment = bio_answers['bio']
-        self.user.change_payment(payment)
+        self.user.add_new_payment(payment)
         clear_screen()
         self.profile()
 
@@ -672,14 +697,13 @@ class ECommerceApp:
                 'type': 'list',
                 'name': 'choice',
                 'message': 'Select the Address',
-                'choices': [{'name': pymt['card_number'], 'value': pymt['card_id']} for pymt in payment_methods]
+                'choices': [pymt.card_number for pymt in payment_methods]
             }
         ]
         payment_selection = prompt(payment_prompt)
-        payment_id = payment_selection['choice']
-        selected_payment = next(pymt for pymt in payment_methods if pymt['card_id'] == payment_id)['card_number']
+        card_number = payment_selection['choice']
         clear_screen()
-        print(f'Update Existing Payment Method: {selected_payment}')
+        print(f'Update Existing Payment Method: {card_number}')
         print('-'*20)
         options = ['Change Payment Method', 'Back']
         questions = [{
@@ -701,7 +725,7 @@ class ECommerceApp:
             ]
             bio_answers = prompt(bio_question)
             payment = bio_answers['bio']
-            self.user.change_payment(payment)
+            self.user.change_payment(card_number,payment)
             clear_screen()
             self.profile()
 
@@ -710,8 +734,8 @@ class ECommerceApp:
         print(f'Sales')
         print('-' * 20)
         sales = self.user.get_sales()
-        for product_name, sale in sales.items():
-            print(f'Name: {product_name} | Sales: {sale}')
+        for sale_objs in sales:
+            print(f'Name: {sale_objs.Product.name} | Sales: {sale_objs.Sale.quantity}')
         questions = [
             {
                 'type': 'list',
@@ -732,7 +756,7 @@ class ECommerceApp:
 
 
     def _barplot(self,sales):
-        df = pd.DataFrame(list(sales.items()), columns=['product', 'sales'])
+        df = pd.DataFrame([(sale_objs.Product.name,sale_objs.Sale.quantity) for sale_objs in sales], columns=['product', 'sales'])
 
         sns.set(style="whitegrid")
         plt.figure(figsize=(10, 6))
@@ -746,8 +770,10 @@ class ECommerceApp:
 
 
     def _lineplot(self,sales):
-        df = pd.DataFrame(list(sales.items()), columns=['product', 'sales'])
-
+        df = pd.DataFrame([(sale_objs.Product.name,sale_objs.Sale.quantity, sale_objs.Sale.datetime) for sale_objs in sales], columns=['product', 'sales','date'])
+        df['date'] = pd.to_datetime(df['date'])
+        df = df.groupby([pd.Grouper(key='date', freq='M'), 'product'])['sales'].sum().reset_index()
+        
         sns.set(style="whitegrid")
         plt.figure(figsize=(10, 6))
         sns.lineplot(x='product', y='sales', data=df, marker='o', palette="viridis")
