@@ -4,7 +4,7 @@ import getpass
 from db_operations import DataBase
 
 
-# from styling import style, logo
+# from constants import style, logo
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')

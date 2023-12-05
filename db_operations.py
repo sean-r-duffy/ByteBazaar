@@ -1,4 +1,3 @@
-from dummy_values import *
 from tables import *
 from sqlalchemy import select, exists
 from sqlalchemy.sql import func
