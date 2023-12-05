@@ -1,4 +1,3 @@
--- TODO: Test
 -- List all products in a category
 CREATE PROCEDURE `byte_bazaar`.`search_products`(
 	IN p_category_id VARCHAR(50),

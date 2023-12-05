@@ -51,8 +51,8 @@ class User:
         return categories
 
     def get_product_details(self, category):
-        product_details = self.db.get_products(category)
-        return product_details
+        product_details, ratings = self.db.get_products(category)
+        return product_details, ratings
 
     def add_to_cart(self, product_id):
         self.db.add_product_to_cart(self.username, product_id)
@@ -77,7 +77,13 @@ class User:
         return self.db.get_user_payment(self.username)
 
     def change_address(self, address_id, street, state, city, postal):
-        return self.db.update_address(address_id, self.username, street, city, state, postal)
+        return self.db.update_address(address_id, street, city, state, postal)
+
+    def delete_address(self, address_id):
+        return self.db.delete_address(address_id)
+
+    def insert_address(self, street, city, state, postal):
+        return self.db.insert_address(self.username, street, city, state, postal)
 
     def change_payment(self, payment):
         return self.db.update_payment(self.username, payment)
@@ -186,7 +192,7 @@ class ECommerceApp:
             self.view_products(answers['choice'])
 
     def view_products(self, category):
-        list_of_products = self.user.get_product_details(category)
+        list_of_products, ratings = self.user.get_product_details(category)
         page_number = 0
         number_of_pages = len(list_of_products)
 
@@ -196,11 +202,13 @@ class ECommerceApp:
             print('-' * 20)
             product = list_of_products[page_number]
             product_id = product.product_id
-            print('Poduct Name: ', product.name)
+            rating = ratings[page_number]
+            print('Product Name: ', product.name)
             # Displaying rating will require a new rating field and a trigger that updates it when a new review is made
             # print('Rating: ', product['rating'])
             print('Description: ', product.description)
             print('Price: ', product.price)
+            print('Average rating: ' + str(rating))
             print('-' * 20)
             options = ['Add to cart', 'Previous', 'Next', 'Back']
             questions = [{
@@ -322,9 +330,12 @@ class ECommerceApp:
         if answers['option'] == 'Back':
             self.customer_main_menu()
         elif answers['option'] == 'Add Address':
-            # TODO function for insert address
+            # TODO: add address
+            # self.user.insert_address(street, city, state, postal)
             pass
         else:
+            address = addresses[options.index(answers['option'])]
+            address_id = address.address_id
             bio_question = [
                 {
                     'type': 'editor',
@@ -334,23 +345,23 @@ class ECommerceApp:
                 }
             ]
             bio_answers = prompt(bio_question)
-            if bio_answers == '':
-                # TODO function to delete address
-                pass
+            if bio_answers['bio'] == '':
+                self.user.delete_address(address_id)
             else:
                 try:
-                    address = bio_answers['bio'].split(' ,')
-                    if len(address) == 3:
-                        street = address[0]
-                        state = address[1]
-                        city = address[2]
-                        postal = address[3]
-                        self.user.change_address(street, state, city, postal)
+                    address_list = bio_answers['bio'].split(' ,')
+                    if len(address_list) == 3:
+                        street = address_list[0]
+                        state = address_list[1]
+                        city = address_list[2]
+                        postal = address_list[3]
+                        self.user.change_address(address_id, street, state, city, postal)
                 except:
                     print("Address wasn't changed!")
             clear_screen()
             self.profile()
 
+    # TODO: Adjust to handle multiple payments
     def _display_change_payment(self):
         clear_screen()
         address = self.user.get_payment()

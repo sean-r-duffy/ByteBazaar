@@ -1,6 +1,7 @@
 from dummy_values import *
 from tables import *
 from sqlalchemy import select, exists
+from sqlalchemy.sql import func
 
 
 class DataBase():
@@ -9,14 +10,15 @@ class DataBase():
 
     def register_user(self, role, username, password):
         if role == 'Customer':
-            Buyer(username=username, password=password).insert()
-            response = True
-        elif role == 'Seller':
-            Seller(username=username, password=password).insert()
-            response = True
+            role = 'buyer'
         else:
-            response = False
-        return response
+            role = 'seller'
+        with Session(engine) as session:
+            session.execute(text('CALL new_buyer_or_seller(:name, :username, :password, :role)'),
+                            {'name': '', 'username': username, 'password': password, 'role': role})
+            session.commit()
+
+        return True
 
     def authenticate_user(self, username, password):
         with Session(engine) as session:
@@ -29,11 +31,17 @@ class DataBase():
 
     def get_products(self, category):
         with Session(engine) as session:
-            products = session.scalars(select(Product)
-                                       .join(Category, Product.category_id == Category.category_id)
-                                       .where(Category.name == category))
+            category_id = session.execute(select(Category.category_id)
+                                          .where(Category.name == category)).scalar()
+            products = session.scalars(text('CALL byte_bazaar.search_products(:category_id);'),
+                                       {'category_id': category})
             products = [x for x in products]
-        return products
+            avg_ratings = []
+            for product in products:
+                rating = session.scalar(text('SELECT avg_rating(:product_id)'),
+                                        {'product_id': product.product_id})
+                avg_ratings.append(rating)
+        return products, avg_ratings
 
     def get_categories(self):
         with Session(engine) as session:
@@ -74,9 +82,17 @@ class DataBase():
             addresses = [x for x in addresses]
         return addresses
 
-    def buy_user_products(self, username):
-        response = True
-        return response
+    def buy_user_products(self, username, address_id, promo_code):
+        shipment = Shipment(address_id=address_id, buyer_username=username)
+        shipment.insert()
+        with Session(engine) as session:
+            carts = session.scalars(select(Cart).where(Cart.buyer_username == username))
+            for cart in carts:
+                sale = Sale(shipment_id=shipment.shipment_id, product_id=cart.product_id, quantity=cart.quantity,
+                            datetime=func.now(), promo_code=promo_code)
+                session.delete(cart)
+            session.commit()
+        return True
 
     def delete_cart_product(self, username, product_id):
         with Session(engine) as session:
@@ -90,14 +106,20 @@ class DataBase():
         return True
 
     def empty_cart(self, username):
-        response = True
-        return response
+        with Session(engine) as session:
+            carts = session.scalars(select(Cart).where(Cart.buyer_username == username))
+            for x in carts:
+                session.delete(x)
+            session.commit()
+        return True
 
-    def get_user_payment(self, username):
-        payment = dummy_payment
-        return dummy_payment
+    def get_user_payments(self, username):
+        with Session(engine) as session:
+            payments = session.scalars(select(Payment).where(Payment.buyer_username == username))
+            payments = [x for x in payments]
+        return payments
 
-    def update_address(self, address_id, username, street, city, state, postal):
+    def update_address(self, address_id, street, city, state, postal):
 
         with Session(engine) as session:
             session.execute(text('CALL byte_bazaar.change_address(:address_id, :street, :city, :state, :postal);'),
@@ -108,12 +130,49 @@ class DataBase():
                              'postal': postal})
             session.commit()
 
-    def update_payment(self, username, payment):
-        pass
+    def delete_address(self, address_id):
+        with Session(engine) as session:
+            address = session.execute(select(Address).where(Address.address_id == address_id)).scalar()
+        address.delete()
+        return True
+
+    def insert_address(self, username, street, city, state, postal):
+        address = Address(buyer_username=username, street=street, city=city, state=state, zip=postal)
+        address.insert()
+        return True
+
+    def delete_payment(self, card_number):
+        with Session(engine) as session:
+            payment = session.execute(select(Payment).where(Payment.card_number == card_number)).scalar()
+        payment.delete()
+        return True
+
+    def insert_payment(self, username, card_number):
+        payment = Payment(card_number=card_number, buyer_username=username)
+        payment.insert()
+        return True
+
+    def update_payment(self, username, card_number):
+        self.delete_payment(card_number)
+        self.insert_payment(username, card_number)
 
     def add_product(self, product_name, product_category, product_description, product_price):
-        pass
+        with Session(engine) as session:
+            category_id = session.execute(select(Category.category_id)
+                                          .where(Category.name == product_category)).scalar()
+            if category_id is not None:
+                product = Product(name=product_name, description=product_description,
+                                  price=product_price, category_id=category_id)
+                session.add(product)
+                session.commit()
+                response = True
+            else:
+                response = False
+        return response
 
     def get_seller_sales(self, username):
-        sales = dummy_sales
+        with Session(engine) as session:
+            sales = session.scalars(text('CALL byte_bazaar.show_prev_orders(:username, :role)'),
+                                    {'username': username, 'role': 'seller'})
+            sales = [x for x in sales]
         return sales
