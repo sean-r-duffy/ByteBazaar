@@ -158,11 +158,21 @@ def create_schema():
         create_database(constants.DATABASE_URI)
         Base.metadata.create_all(engine)
 
-        sql_scripts = glob.glob('SQL/Stored Procedures/*.sql')
-        sql_scripts.append('SQL/data.sql')
+        stored_procs = glob.glob('SQL/Stored Procedures/*.sql')
+        functions = glob.glob('SQL/Functions/*.sql')
+        views = 'SQL/views.sql'
+        data = 'SQL/data.sql'
 
         with Session(engine) as session:
-            for x in sql_scripts:
+            for x in stored_procs:
                 with open(x) as file:
                     session.execute(text(file.read()))
+            for x in functions:
+                with open(x) as file:
+                    session.execute(text(file.read()))
+            with open(views) as file:
+                session.execute(text(file.read()))
+            with open(data) as file:
+                session.execute(text(file.read()))
+
             session.commit()

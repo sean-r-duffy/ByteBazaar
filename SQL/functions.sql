@@ -1,4 +1,3 @@
--- TODO: Split and add to DB
 DELIMITER $$
 
 CREATE FUNCTION get_inventory(

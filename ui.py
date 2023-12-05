@@ -60,6 +60,9 @@ class User:
     def get_cart_products(self):
         return self.db.get_user_cart(self.username)
 
+    def get_cart_subtotal(self):
+        return self.db.get_cart_subtotal(self.username)
+
     def remove_cart_product(self, product_id):
         self.db.delete_cart_product(self.username, product_id)
 
@@ -67,16 +70,14 @@ class User:
         self.db.buy_user_products(self.username)
         self.db.empty_cart(self.username)
 
-    # TODO: Test, needs to return address_id field
-    def get_address(self):
-        return self.db.get_user_address(self.username)
+    def get_addresses(self):
+        return self.db.get_user_addresses(self.username)
 
     def get_payment(self):
         return self.db.get_user_payment(self.username)
 
-    # TODO: Test, needs address_id field
-    def change_address(self, street, state, city, postal):
-        return self.db.update_address(self.username, street, city, state, postal)
+    def change_address(self, address_id, street, state, city, postal):
+        return self.db.update_address(address_id, self.username, street, city, state, postal)
 
     def change_payment(self, payment):
         return self.db.update_payment(self.username, payment)
@@ -231,22 +232,26 @@ class ECommerceApp:
                     self.customer_main_menu()
                 else:
                     self.seller_main_menu()
+                    self.seller_main_menu()
 
         view_each_product(page_number)
 
-    # TODO: Add quantity to items_view, may need a view in SQL of product + cart
     def cart(self):
         clear_screen()
+        subtotal = self.user.get_cart_subtotal()
         print('Cart')
+        print('Total: $' + str(subtotal))
         print('-' * 20)
         list_of_products = self.user.get_cart_products()
         items_view_list = []
         product_id_mapping = {}
-        for each_product in list_of_products:
-            product_name = each_product.name
-            product_id = each_product.product_id
-            product_price = str(each_product.price)
-            items_view = 'Product Name: ' + product_name + ' | Price: ' + product_price
+        for x in list_of_products:
+            product = x[0]
+            qty = x[1]
+            product_name = product.name
+            product_id = product.product_id
+            product_price = str(product.price)
+            items_view = 'Product Name: ' + product_name + ' | Price: ' + product_price + ' | Qty: ' + str(qty)
             items_view_list.append(items_view)
             product_id_mapping[items_view] = product_id
         questions = [
@@ -299,9 +304,14 @@ class ECommerceApp:
         clear_screen()
         print('Address')
         print('-' * 20)
-        address = self.user.get_address()
-        print(f'Current Address: {address}')
-        options = ['Change Address', 'Back']
+        addresses = self.user.get_addresses()
+        if len(addresses) == 0:
+            print('No addresses saved')
+        else:
+            print('Select address to edit')
+        options = [f'{x.street}, {x.state}, {x.city} {x.zip}' for x in addresses]
+        options.append('Add Address')
+        options.append('Back')
         questions = [{
             'type': 'list',
             'name': 'option',
@@ -311,25 +321,33 @@ class ECommerceApp:
         answers = prompt(questions)
         if answers['option'] == 'Back':
             self.customer_main_menu()
-        elif answers['option'] == 'Change Address':
+        elif answers['option'] == 'Add Address':
+            # TODO function for insert address
+            pass
+        else:
             bio_question = [
                 {
                     'type': 'editor',
                     'name': 'bio',
-                    'message': 'Please type in the following format -> Street, State, City, Postal (Esc+Enter to exit): ',
+                    'message': 'Leave blank to delete or type new address in the format -> Street, State, City, Postal '
+                               '(Esc+Enter to exit): ',
                 }
             ]
             bio_answers = prompt(bio_question)
-            try:
-                address = bio_answers['bio'].split(' ,')
-                if len(address) == 3:
-                    street = address[0]
-                    state = address[1]
-                    city = address[2]
-                    postal = address[3]
-                    self.user.change_address(street, state, city, postal)
-            except:
-                print("Address wasn't changed!")
+            if bio_answers == '':
+                # TODO function to delete address
+                pass
+            else:
+                try:
+                    address = bio_answers['bio'].split(' ,')
+                    if len(address) == 3:
+                        street = address[0]
+                        state = address[1]
+                        city = address[2]
+                        postal = address[3]
+                        self.user.change_address(street, state, city, postal)
+                except:
+                    print("Address wasn't changed!")
             clear_screen()
             self.profile()
 

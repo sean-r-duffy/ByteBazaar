@@ -47,28 +47,32 @@ class DataBase():
             if cart is not None:
                 cart.quantity += 1
             else:
-                cart = Cart(buyer_username=username, product_id=product_id, quantity=1)
-                session.add(cart)
+                session.execute(text('CALL byte_bazaar.add_to_cart(:product_id, :username, 1);'),
+                                {'product_id': product_id, 'username': username})
             session.commit()
         return True
 
     def get_user_cart(self, username):
         with Session(engine) as session:
-            cart_products = session.scalars(select(Product).join(Cart, Cart.product_id == Product.product_id)
+            cart_products = session.execute(select(Product, Cart).join(Cart, Cart.product_id == Product.product_id)
                                             .where(Cart.buyer_username == username))
-            list_of_products = [x for x in cart_products]
+            list_of_products = [(x.Product, x.Cart.quantity) for x in cart_products]
         return list_of_products
 
-    # TODO: Adjust ui.py to handle multiple addresses per user, add address if none are in system
-    def get_user_address(self, username):
+    def get_cart_subtotal(self, username):
+        with Session(engine) as session:
+            subtotal = session.execute(text('SELECT cart_subtotal(:username)'), {'username': username}).scalar()
+        if subtotal is None:
+            return 0
+        else:
+            return subtotal
+
+    def get_user_addresses(self, username):
         with Session(engine) as session:
             addresses = session.scalars(select(Address).join(Buyer, Address.buyer_username == Buyer.username)
                                         .where(Buyer.username == username))
             addresses = [x for x in addresses]
-        address = addresses[0]
-        zip = ('0' * (5 - len(str(address.zip)))) + str(address.zip)
-        address_string = address.street + ' ' + address.city + ', ' + address.state + ' ' + zip
-        return address_string
+        return addresses
 
     def buy_user_products(self, username):
         response = True
@@ -93,17 +97,15 @@ class DataBase():
         payment = dummy_payment
         return dummy_payment
 
-    # TODO: Test, needs address_id field
-    def update_address(self, username, street, city, state, postal):
+    def update_address(self, address_id, username, street, city, state, postal):
 
         with Session(engine) as session:
-            address_id = session.execute(select(Address.address_id).where(Address.buyer_username == username))
-            session.execute(text('CALL byte_bazaar.change_address(:address_id, :street, :city, :state, :postal);',
-                                 {'address_id': address_id,
-                                  'street': street,
-                                  'city': city,
-                                  'state': state,
-                                  'postal': postal}))
+            session.execute(text('CALL byte_bazaar.change_address(:address_id, :street, :city, :state, :postal);'),
+                            {'address_id': address_id,
+                             'street': street,
+                             'city': city,
+                             'state': state,
+                             'postal': postal})
             session.commit()
 
     def update_payment(self, username, payment):
