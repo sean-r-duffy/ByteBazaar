@@ -165,15 +165,17 @@ class DataBase():
         with Session(engine) as session:
             category_id = session.execute(select(Category.category_id)
                                           .where(Category.name == product_category)).scalar()
-            if category_id is not None:
-                product = Product(name=product_name, description=product_description,
-                                  price=product_price, category_id=category_id)
-                session.add(product)
-                session.commit()
-                response = True
-            else:
-                response = False
-        return response
+            product = Product(name=product_name, description=product_description,
+                              price=product_price, category_id=category_id)
+            session.add(product)
+            session.commit()
+            product_id = session.scalar(select(Product.product_id)
+                                        .where(Product.name == product_name,
+                                               Product.description == product_description,
+                                               Product.price == product_price,
+                                               Product.category_id == category_id))
+
+        return product_id
 
     def prod_name_from_id(self, product_id):
         with Session(engine) as session:
@@ -205,3 +207,8 @@ class DataBase():
             urls = session.scalars(select(Image.url).where(Image.product_id == product_id))
             urls = [x for x in urls]
         return urls
+
+    def add_image(self, url, product_id):
+        image = Image(url=url, product_id=product_id)
+        image.insert()
+        return True

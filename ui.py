@@ -124,6 +124,9 @@ class User:
     def prod_name_from_id(self, product_id):
         return self.db.prod_name_from_id(product_id)
 
+    def add_image(self, url, product_id):
+        return self.db.add_image(url, product_id)
+
 class ECommerceApp:
     def __init__(self):
         self.user = None
@@ -870,6 +873,7 @@ class ECommerceApp:
         product_category = answers['choice']
         product_description = input('Description: ')
         product_price = input('Price: ')
+        product_images = input('Image URLs (separate with ", "): ')
         questions = [
             {
                 'type': 'confirm',
@@ -880,7 +884,12 @@ class ECommerceApp:
         ]
         answer = prompt(questions)
         if answer['continue']:
-            self.user.add_seller_product(product_name, product_category, product_description, product_price)
+            product_id = self.user.add_seller_product(product_name, product_category, product_description, product_price)
+            print(product_id)
+            if product_images != '':
+                urls = product_images.split(', ')
+                for url in urls:
+                    self.user.add_image(url, product_id)
 
         self.seller_main_menu()
 
