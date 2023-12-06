@@ -330,7 +330,9 @@ class ECommerceApp:
     def view_reviews(self, reviews, product_name):
         page_number = 0
         if not reviews:
-            reviews = ['']
+            print(f'No Reviews for this product.')
+            time.sleep(1.5)
+            self.customer_main_menu()
         number_of_pages = len(reviews)
         def view_each_review(page_number):
             clear_screen()
