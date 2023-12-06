@@ -7,6 +7,7 @@ from constants import logo
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 import seaborn as sns
 
 # from constants import style, logo
@@ -830,7 +831,7 @@ class ECommerceApp:
     def _barplot(self,sales):
         df = pd.DataFrame([(self.user.prod_name_from_id(sale_objs.product_id),
                             sale_objs.quantity) for sale_objs in sales], columns=['product', 'sales'])
-
+        df = df.groupby('product').sum('sales').sort_values('sales')
         sns.set(style="whitegrid")
         plt.figure(figsize=(10, 6))
         sns.barplot(x='product', y='sales', data=df, palette="viridis")
@@ -850,7 +851,11 @@ class ECommerceApp:
         
         sns.set(style="whitegrid")
         plt.figure(figsize=(10, 6))
-        sns.lineplot(x='product', y='sales', data=df, marker='o', palette="viridis")
+        sns.lineplot(x='date', y='sales', data=df, hue='product',marker='o')
+        # sns.lineplot(x='date', y='sales', data=df,marker='o')
+        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%B'))
+        plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
+        plt.xticks(rotation=45)
         plt.title('Sales by Product Per Month')
         plt.xlabel('Product')
         plt.ylabel('Sales')
