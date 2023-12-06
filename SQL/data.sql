@@ -8,6 +8,7 @@ INSERT INTO byte_bazaar.buyer (username, name, password) VALUES ('grace.lee@byte
 INSERT INTO byte_bazaar.buyer (username, name, password) VALUES ('henry.wilson@bytebazaar.com', 'Henry Wilson', 'henrypw');
 INSERT INTO byte_bazaar.buyer (username, name, password) VALUES ('ivy.taylor@bytebazaar.com', 'Ivy Taylor', 'ivypass');
 INSERT INTO byte_bazaar.buyer (username, name, password) VALUES ('john.doe@bytebazaar.com', 'John Doe', 'johndoepass');
+INSERT INTO byte_bazaar.buyer (username, name, password) VALUES ('deleted.user@bytebazaar.com', 'deleteduser', 'deleteduser');
 INSERT INTO byte_bazaar.address (buyer_username, street, city, state, zip) VALUES ('alice.johnson@bytebazaar.com', '123 Oak Street', 'Springfield', 'California', 12345);
 INSERT INTO byte_bazaar.address (buyer_username, street, city, state, zip) VALUES ('bob.smith@bytebazaar.com', '456 Maple Avenue', 'Greenville', 'Texas', 23456);
 INSERT INTO byte_bazaar.address (buyer_username, street, city, state, zip) VALUES ('carol.white@bytebazaar.com', '789 Pine Lane', 'Fairview', 'Florida', 34567);

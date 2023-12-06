@@ -877,8 +877,8 @@ class ECommerceApp:
         
         sns.set(style="whitegrid")
         plt.figure(figsize=(10, 6))
-        sns.lineplot(x='date', y='sales', data=df, hue='product',marker='o')
-        # sns.lineplot(x='date', y='sales', data=df,marker='o')
+        # sns.lineplot(x='date', y='sales', data=df, hue='product',marker='o')
+        sns.lineplot(x='date', y='sales', data=df,marker='o')
         plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%B'))
         plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
         plt.xticks(rotation=45)
