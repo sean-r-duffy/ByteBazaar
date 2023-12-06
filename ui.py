@@ -64,6 +64,9 @@ class User:
         product_details = self.db.get_products(category)
         return product_details
 
+    def get_images(self, product_id):
+        return self.db.get_images(product_id)
+
     def add_to_cart(self, product_id):
         self.db.add_product_to_cart(self.username, product_id)
 
@@ -232,6 +235,9 @@ class ECommerceApp:
             print('-' * 20)
             product = list_of_products[page_number]
             product_id = product.product_id
+            images = self.user.get_images(product_id)
+            for x in images:
+                print(x)
             print('Product Name: ', product.name)
             print('Description: ', product.description)
             print('Price: ', product.price)
