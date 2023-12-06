@@ -860,7 +860,7 @@ class ECommerceApp:
         df = df.groupby('product').sum('sales').sort_values('sales')
         sns.set(style="whitegrid")
         plt.figure(figsize=(10, 6))
-        sns.barplot(x='product', y='sales', data=df, palette="viridis")
+        sns.barplot(x='product', y='sales', data=df)
         plt.title('Sales by Product')
         plt.xlabel('Product')
         plt.ylabel('Sales')
