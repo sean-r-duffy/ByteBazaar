@@ -175,7 +175,7 @@ INSERT INTO byte_bazaar.seller (name, username, password) VALUES ('BookWorld Ltd
 INSERT INTO byte_bazaar.seller (name, username, password) VALUES ('FashionFiesta Co.', 'fashionfiesta', 'fashionpass');
 INSERT INTO byte_bazaar.seller (name, username, password) VALUES ('TechTrendz LLC', 'techtrendz', 'tech1234');
 INSERT INTO byte_bazaar.seller (name, username, password) VALUES ('HealthyLife Organics', 'healthylife', 'organicpass');
-INSERT INTO byte_bazaar.seller (name, username, password) VALUES ('GadgetGuru Inc.', 'gadgetguru', 'gadgetpass');
+INSERT INTO byte_bazaar.seller (name, username, password) VALUES ('GadgetGuru Inc.', 'mike@gadgetguru.com', 'password');
 INSERT INTO byte_bazaar.seller (name, username, password) VALUES ('SportsStar LLC', 'sportsstar', 'sportspass');
 INSERT INTO byte_bazaar.seller (name, username, password) VALUES ('HomeEssentials Ltd.', 'homeessentials', 'home123');
 INSERT INTO byte_bazaar.seller (name, username, password) VALUES ('BeautyBoutique Co.', 'beautyboutique', 'beautypass');
