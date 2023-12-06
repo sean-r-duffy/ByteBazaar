@@ -1,3 +1,4 @@
+INSERT INTO byte_bazaar.buyer (username, name, password) VALUES ('deleted.user@bytebazaar.com', 'deleted.user', 'deleted.user');
 INSERT INTO byte_bazaar.buyer (username, name, password) VALUES ('alice.johnson@bytebazaar.com', 'Alice Johnson', 'pass1234');
 INSERT INTO byte_bazaar.buyer (username, name, password) VALUES ('bob.smith@bytebazaar.com', 'Bob Smith', 'bobsecretpass');
 INSERT INTO byte_bazaar.buyer (username, name, password) VALUES ('carol.white@bytebazaar.com', 'Carol White', 'carolpw123');

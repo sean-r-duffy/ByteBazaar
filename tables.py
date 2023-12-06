@@ -132,9 +132,9 @@ class Payment(Base):
 
     card_number = mapped_column(BigInteger, primary_key=True)
     buyer_username = mapped_column(String(40), ForeignKey('buyer.username'))
-    cvv = mapped_column(Integer)
-    exp_month = mapped_column(Integer)
-    exp_day = mapped_column(Integer)
+    #cvv = mapped_column(Integer)
+    #exp_month = mapped_column(Integer)
+    #exp_day = mapped_column(Integer)
 
 
 class Address(Base):

@@ -13,6 +13,11 @@ import seaborn as sns
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
+def zip_to_str(int):
+    zip_string = str(int)
+    zip_string = '0' * (5 - len(zip_string)) + zip_string
+    return zip_string
+
 
 class User:
     def __init__(self, role):
@@ -101,6 +106,9 @@ class User:
     def change_payment(self,old_card_number, new_card_number):
         return self.db.update_payment(self.username, old_card_number, new_card_number)
 
+    def delete_payment(self, old_card_number):
+        return self.db.delete_payment(old_card_number)
+
     def add_new_payment(self,payment):
         return self.db.insert_payment(self.username, payment)
 
@@ -109,6 +117,9 @@ class User:
 
     def get_sales(self):
         return self.db.get_seller_sales(self.username)
+
+    def prod_name_from_id(self, product_id):
+        return self.db.prod_name_from_id(product_id)
 
 class ECommerceApp:
     def __init__(self):
@@ -302,7 +313,8 @@ class ECommerceApp:
         review = bio_answers['bio']
         self.user.enter_product_rating(product_id, int(rating), review)
         self.customer_main_menu()
-    
+
+    # TODO: Errors out when reviews is empty
     def view_reviews(self, reviews, product_name):
         page_number = 0
         if not reviews:
@@ -375,7 +387,7 @@ class ECommerceApp:
             items_view_list.append(items_view)
             if current_product==len_of_products-1:
                 items_view_list.append('-'*20)
-                items_view_list.append(f'Total: $.{cart_subtotal}')
+                items_view_list.append(f'Total: ${cart_subtotal}')
                 items_view_list.append('-'*20)
             product_id_mapping[items_view] = product_id
         questions = [
@@ -422,7 +434,8 @@ class ECommerceApp:
                     'type': 'list',
                     'name': 'choice',
                     'message': 'Select the address: ',
-                    'choices': [{'name': (', ').join([addr.street, addr.city, addr.state, str(addr.zip)]), 'value': addr.address_id} for addr in addresses]
+                    'choices': [{'name': (', ').join([addr.street, addr.city, addr.state, zip_to_str(addr.zip)]),
+                                 'value': addr.address_id} for addr in addresses]
                 }
             ]
 
@@ -529,7 +542,7 @@ class ECommerceApp:
                 self.add_new_address_window()
         else:
             for addr in addresses:
-                print((', ').join([addr.street, addr.city, addr.state, str(addr.zip)]))
+                print((', ').join([addr.street, addr.city, addr.state, zip_to_str(addr.zip)]))
             options = ['Back']
             questions = [{
                 'type': 'list',
@@ -549,7 +562,7 @@ class ECommerceApp:
             {
                 'type': 'editor',
                 'name': 'bio',
-                'message': 'Please type in the following format -> Street, State, City, Postal (Esc+Enter to exit): ',
+                'message': 'Please type in the following format -> Street, City, State, Postal (Esc+Enter to exit): ',
             }
         ]
         bio_answers = prompt(bio_question)
@@ -563,8 +576,10 @@ class ECommerceApp:
                 self.user.insert_address(street, city, state, postal)
             else:
                 print(f'Address not entered')
+                time.sleep(2)
         except:
             print("Address wasn't changed!")
+            time.sleep(2)
         clear_screen()
         self.profile()
 
@@ -593,13 +608,13 @@ class ECommerceApp:
                 'type': 'list',
                 'name': 'choice',
                 'message': 'Select the Address',
-                'choices': [{'name': (', ').join([addr.street, addr.city, addr.state, str(addr.zip)]), 'value': addr.address_id} for addr in addresses]
+                'choices': [{'name': (', ').join([addr.street, addr.city, addr.state, zip_to_str(addr.zip)]), 'value': addr.address_id} for addr in addresses]
             }
         ]
         address_selection = prompt(address_prompt)
         address_id = address_selection['choice']
         address_objs = next(addr for addr in addresses if addr.address_id== address_id)
-        selected_address = ', '.join([address_objs.street, address_objs.city, address_objs.state,str(address_objs.zip)])
+        selected_address = ', '.join([address_objs.street, address_objs.city, address_objs.state,zip_to_str(address_objs.zip)])
         clear_screen()
         print(f'Update Existing Address: {selected_address}')
         print('-'*20)
@@ -624,18 +639,20 @@ class ECommerceApp:
             ]
             bio_answers = prompt(bio_question)
             try:
-                address = bio_answers['bio'].split(' ,')
+                print(bio_answers['bio'])
+                address = bio_answers['bio'].split(', ')
                 if len(address) == 4:
                     street = address[0]
                     state = address[1]
                     city = address[2]
                     postal = address[3]
-                    self.user.change_address(address_id, street, state, city, int(postal))
+                    self.user.change_address(address_id, street, state, city, postal)
                 if bio_answers['bio']=='':
                     self.user.delete_address(address_id)
             except Exception as e:
-                print(e)
+                # print(e)
                 print("Address wasn't changed!")
+                time.sleep(2)
             clear_screen()
             self.profile()
 
@@ -645,7 +662,7 @@ class ECommerceApp:
         clear_screen()
         print(f'Payment')
         print('-'*20)
-        options = ['View Payment Method','Add New Payment Method', 'Update Existing Payment Method','Back']
+        options = ['View Payment Methods','Add New Payment Method', 'Update Existing Payment Method','Back']
         questions = [{
             'type': 'list',
             'name': 'choice',
@@ -654,7 +671,7 @@ class ECommerceApp:
         }]
         answer = prompt(questions)
         selection = answer['choice']
-        if selection == 'View Payment Method':
+        if selection == 'View Payment Methods':
             self.view_payment_methods()
         elif selection =='Add New Payment Method':
             self.add_new_payment_method_window()
@@ -761,12 +778,15 @@ class ECommerceApp:
                 {
                     'type': 'editor',
                     'name': 'bio',
-                    'message': 'Please your card details (Esc+Enter to exit): ',
+                    'message': 'Please your card details or leave blank to delete this payment (Esc+Enter to exit): ',
                 }
             ]
             bio_answers = prompt(bio_question)
             payment = bio_answers['bio']
-            self.user.change_payment(card_number,payment)
+            if payment == '':
+                self.user.delete_payment(card_number)
+            else:
+                self.user.change_payment(card_number, payment)
             clear_screen()
             self.profile()
 
@@ -776,7 +796,7 @@ class ECommerceApp:
         print('-' * 20)
         sales = self.user.get_sales()
         for sale_objs in sales:
-            print(f'Name: {sale_objs.Product.name} | Sales: {sale_objs.Sale.quantity}')
+            print(f'Name: {self.user.prod_name_from_id(sale_objs.product_id)} | Sales: {sale_objs.quantity}')
         questions = [
             {
                 'type': 'list',
@@ -797,7 +817,8 @@ class ECommerceApp:
 
 
     def _barplot(self,sales):
-        df = pd.DataFrame([(sale_objs.Product.name,sale_objs.Sale.quantity) for sale_objs in sales], columns=['product', 'sales'])
+        df = pd.DataFrame([(self.user.prod_name_from_id(sale_objs.product_id),
+                            sale_objs.quantity) for sale_objs in sales], columns=['product', 'sales'])
 
         sns.set(style="whitegrid")
         plt.figure(figsize=(10, 6))
@@ -811,7 +832,8 @@ class ECommerceApp:
 
 
     def _lineplot(self,sales):
-        df = pd.DataFrame([(sale_objs.Product.name,sale_objs.Sale.quantity, sale_objs.Sale.datetime) for sale_objs in sales], columns=['product', 'sales','date'])
+        df = pd.DataFrame([(self.user.prod_name_from_id(sale_objs.product_id), sale_objs.quantity,
+                            sale_objs.datetime) for sale_objs in sales], columns=['product', 'sales','date'])
         df['date'] = pd.to_datetime(df['date'])
         df = df.groupby([pd.Grouper(key='date', freq='M'), 'product'])['sales'].sum().reset_index()
         

@@ -124,7 +124,7 @@ class DataBase():
         return payments
 
     def update_address(self, address_id, street, city, state, postal):
-
+        print(str(address_id) + ', ' + street + ', ' + city + ', ' + state + ', ' + postal)
         with Session(engine) as session:
             session.execute(text('CALL byte_bazaar.change_address(:address_id, :street, :city, :state, :postal);'),
                             {'address_id': address_id,
@@ -137,7 +137,8 @@ class DataBase():
     def delete_address(self, address_id):
         with Session(engine) as session:
             address = session.execute(select(Address).where(Address.address_id == address_id)).scalar()
-        address.delete()
+            address.buyer_username = 'deleted.user@bytebazaar.com'
+            session.commit()
         return True
 
     def insert_address(self, username, street, city, state, postal):
@@ -174,10 +175,17 @@ class DataBase():
                 response = False
         return response
 
+    def prod_name_from_id(self, product_id):
+        with Session(engine) as session:
+            name = session.scalar(select(Product.name).where(Product.product_id == product_id))
+        return name
+
     def get_seller_sales(self, username):
         with Session(engine) as session:
-            sales = session.execute(text('CALL byte_bazaar.show_prev_orders(:username, :role)'),
-                                    {'username': username, 'role': 'seller'})
+            sales = session.scalars(select(Sale)
+                                    .join(Sells, Sells.product_id == Sale.product_id)
+                                    .join(Seller, Sells.seller_id == Seller.seller_id)
+                                    .where(Seller.username == username))
             sales = [x for x in sales]
         return sales
 
