@@ -300,6 +300,8 @@ class ECommerceApp:
             self.view_reviews(reviews,product_name)
         elif selection =='Write Review':
             self.write_review(product_name, product_id)
+        else:
+            self.customer_main_menu()
 
     def write_review(self, product_name, product_id):
         clear_screen()
@@ -330,7 +332,9 @@ class ECommerceApp:
     def view_reviews(self, reviews, product_name):
         page_number = 0
         if not reviews:
-            reviews = ['']
+            print(f'No Reviews for this product.')
+            time.sleep(1.5)
+            self.customer_main_menu()
         number_of_pages = len(reviews)
         def view_each_review(page_number):
             clear_screen()
@@ -338,11 +342,6 @@ class ECommerceApp:
             print('-' * 20)
             review = reviews[page_number].text
             print(review)
-            # print('Poduct Name: ', product.name)
-            # # Displaying rating will require a new rating field and a trigger that updates it when a new review is made
-            # # print('Rating: ', product['rating'])
-            # print('Description: ', product.description)
-            # print('Price: ', product.price)
             print('-' * 20)
             options = ['Previous', 'Next', 'Back']
             questions = [{
@@ -365,14 +364,8 @@ class ECommerceApp:
                 else:
                     page_number += 1
                     view_each_review(page_number)
-            else:
-                if self.user.role == 'Customer':
-                    self.customer_main_menu()
-                else:
-                    self.seller_main_menu()
-                    self.seller_main_menu()
-
         view_each_review(page_number)
+        self.customer_main_menu()
 
     # TODO: Add quantity to items_view, may need a view in SQL of product + cart
     def cart(self):
@@ -570,28 +563,42 @@ class ECommerceApp:
         clear_screen()
         print(f'Add New Address')
         print('-'*20)
-        bio_question = [
-            {
-                'type': 'editor',
-                'name': 'bio',
-                'message': 'Please type in the following format -> Street, City, State, Postal (Esc+Enter to exit): ',
-            }
-        ]
-        bio_answers = prompt(bio_question)
+        # bio_question = [
+        #     {
+        #         'type': 'editor',
+        #         'name': 'bio',
+        #         'message': 'Please type in the following format -> Street, City, State, Postal (Esc+Enter to exit): ',
+        #     }
+        # ]
+        # bio_answers = prompt(bio_question)
+        # try:
+        #     address = bio_answers['bio'].split(', ')
+        #     if len(address) == 4:
+        #         street = address[0]
+        #         state = address[1]
+        #         city = address[2]
+        #         postal = address[3]
+        #         self.user.insert_address(street, city, state, postal)
+        #     else:
+        #         print(f'Address not entered')
+        #         time.sleep(2)
+        # except:
+        #     print("Address wasn't changed!")
+        #     time.sleep(2)
         try:
-            address = bio_answers['bio'].split(', ')
-            if len(address) == 4:
-                street = address[0]
-                state = address[1]
-                city = address[2]
-                postal = address[3]
+            # Get each part of the address individually
+            street = input('Please enter the street: ')
+            city = input('Please enter the city: ')
+            state = input('Please enter the state: ')
+            postal = input('Please enter the postal code (5 digits): ')
+            if postal.isdigit() and len(postal) == 5:
                 self.user.insert_address(street, city, state, postal)
             else:
-                print(f'Address not entered')
-                time.sleep(2)
-        except:
-            print("Address wasn't changed!")
-            time.sleep(2)
+                print('The postal code must be a 5-digit number.')
+                time.sleep(1.5)
+                self._display_change_address()
+        except Exception as e:
+            print(f"An error occurred")
         clear_screen()
         self.profile()
 
@@ -626,7 +633,7 @@ class ECommerceApp:
         address_selection = prompt(address_prompt)
         address_id = address_selection['choice']
         address_objs = next(addr for addr in addresses if addr.address_id== address_id)
-        selected_address = ', '.join([address_objs.street, address_objs.city, address_objs.state, zip_to_str(address_objs.zip)])
+        selected_address = ', '.join([address_objs.street, address_objs.city, address_objs.state,zip_to_str(address_objs.zip)])
         clear_screen()
         print(f'Update Existing Address: {selected_address}')
         print('-'*20)
@@ -641,33 +648,53 @@ class ECommerceApp:
         if answers['option'] == 'Back':
             self.customer_main_menu()
         elif answers['option'] == 'Change Address':
-            bio_question = [
-                {
-                    'type': 'editor',
-                    'name': 'bio',
-                    'message': 'Leave blank to delete or type new address in the format -> Street, State, City, Postal '
-                               '(Esc+Enter to exit): ',
-                }
-            ]
-            bio_answers = prompt(bio_question)
+            print('[Leave blank to delete]')
+            # bio_question = [
+            #     {
+            #         'type': 'editor',
+            #         'name': 'bio',
+            #         'message': 'Leave blank to delete or type new address in the format -> Street, State, City, Postal '
+            #                    '(Esc+Enter to exit): ',
+            #     }
+            # ]
+            # bio_answers = prompt(bio_question)
+            # try:
+            #     print(bio_answers['bio'])
+            #     address = bio_answers['bio'].split(', ')
+            #     if len(address) == 4:
+            #         street = address[0]
+            #         state = address[1]
+            #         city = address[2]
+            #         postal = address[3]
+            #         self.user.change_address(address_id, street, state, city, postal)
+            #     if bio_answers['bio']=='':
+            #         self.user.delete_address(address_id)
+            # except Exception as e:
+            #     # print(e)
+            #     print("Address wasn't changed!")
+            #     time.sleep(2)
             try:
-                print(bio_answers['bio'])
-                address = bio_answers['bio'].split(', ')
-                if len(address) == 4:
-                    street = address[0]
-                    state = address[1]
-                    city = address[2]
-                    postal = address[3]
-                    self.user.change_address(address_id, street, city, state, postal)
-                if bio_answers['bio']=='':
+                street = input('Please enter the street: ')
+                city = input('Please enter the city: ')
+                state = input('Please enter the state: ')
+                postal = input('Please enter the postal code (5 digits): ')
+
+                if postal =='':
                     self.user.delete_address(address_id)
+                elif postal.isdigit() and len(postal) == 5:
+                    self.user.change_address(address_id, street, state, city, postal)
+                else:
+                    print('The postal code must be a 5-digit number.')
+                    time.sleep(1.5)
+                    self._display_change_address()
             except Exception as e:
-                # print(e)
-                print("Address wasn't changed!")
-                time.sleep(2)
+                print(f"An error occurred. Address wasn't changed!{e}")
+                time.sleep(1.5)
+                exit()
             clear_screen()
             self.profile()
 
+    # TODO: Adjust to handle multiple payments, adding, editing, deleting, payments
     # TODO: Display cvv and exp date
     def _display_change_payment(self):
         clear_screen()
@@ -850,8 +877,8 @@ class ECommerceApp:
         
         sns.set(style="whitegrid")
         plt.figure(figsize=(10, 6))
-        # sns.lineplot(x='date', y='sales', data=df, hue='product',marker='o')
-        sns.lineplot(x='date', y='sales', data=df, marker='o')
+        sns.lineplot(x='date', y='sales', data=df, hue='product',marker='o')
+        # sns.lineplot(x='date', y='sales', data=df,marker='o')
         plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%B'))
         plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
         plt.xticks(rotation=45)
