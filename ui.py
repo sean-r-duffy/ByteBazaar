@@ -300,6 +300,8 @@ class ECommerceApp:
             self.view_reviews(reviews,product_name)
         elif selection =='Write Review':
             self.write_review(product_name, product_id)
+        else:
+            self.customer_main_menu()
 
     def write_review(self, product_name, product_id):
         clear_screen()
@@ -340,11 +342,6 @@ class ECommerceApp:
             print('-' * 20)
             review = reviews[page_number].text
             print(review)
-            # print('Poduct Name: ', product.name)
-            # # Displaying rating will require a new rating field and a trigger that updates it when a new review is made
-            # # print('Rating: ', product['rating'])
-            # print('Description: ', product.description)
-            # print('Price: ', product.price)
             print('-' * 20)
             options = ['Previous', 'Next', 'Back']
             questions = [{
@@ -367,14 +364,8 @@ class ECommerceApp:
                 else:
                     page_number += 1
                     view_each_review(page_number)
-            else:
-                if self.user.role == 'Customer':
-                    self.customer_main_menu()
-                else:
-                    self.seller_main_menu()
-                    self.seller_main_menu()
-
         view_each_review(page_number)
+        self.customer_main_menu()
 
     # TODO: Add quantity to items_view, may need a view in SQL of product + cart
     def cart(self):
