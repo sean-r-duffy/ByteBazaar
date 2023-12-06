@@ -563,28 +563,42 @@ class ECommerceApp:
         clear_screen()
         print(f'Add New Address')
         print('-'*20)
-        bio_question = [
-            {
-                'type': 'editor',
-                'name': 'bio',
-                'message': 'Please type in the following format -> Street, City, State, Postal (Esc+Enter to exit): ',
-            }
-        ]
-        bio_answers = prompt(bio_question)
+        # bio_question = [
+        #     {
+        #         'type': 'editor',
+        #         'name': 'bio',
+        #         'message': 'Please type in the following format -> Street, City, State, Postal (Esc+Enter to exit): ',
+        #     }
+        # ]
+        # bio_answers = prompt(bio_question)
+        # try:
+        #     address = bio_answers['bio'].split(', ')
+        #     if len(address) == 4:
+        #         street = address[0]
+        #         state = address[1]
+        #         city = address[2]
+        #         postal = address[3]
+        #         self.user.insert_address(street, city, state, postal)
+        #     else:
+        #         print(f'Address not entered')
+        #         time.sleep(2)
+        # except:
+        #     print("Address wasn't changed!")
+        #     time.sleep(2)
         try:
-            address = bio_answers['bio'].split(', ')
-            if len(address) == 4:
-                street = address[0]
-                state = address[1]
-                city = address[2]
-                postal = address[3]
+            # Get each part of the address individually
+            street = input('Please enter the street: ')
+            city = input('Please enter the city: ')
+            state = input('Please enter the state: ')
+            postal = input('Please enter the postal code (5 digits): ')
+            if postal.isdigit() and len(postal) == 5:
                 self.user.insert_address(street, city, state, postal)
             else:
-                print(f'Address not entered')
-                time.sleep(2)
-        except:
-            print("Address wasn't changed!")
-            time.sleep(2)
+                print('The postal code must be a 5-digit number.')
+                time.sleep(1.5)
+                self._display_change_address()
+        except Exception as e:
+            print(f"An error occurred")
         clear_screen()
         self.profile()
 
@@ -634,30 +648,48 @@ class ECommerceApp:
         if answers['option'] == 'Back':
             self.customer_main_menu()
         elif answers['option'] == 'Change Address':
-            bio_question = [
-                {
-                    'type': 'editor',
-                    'name': 'bio',
-                    'message': 'Leave blank to delete or type new address in the format -> Street, State, City, Postal '
-                               '(Esc+Enter to exit): ',
-                }
-            ]
-            bio_answers = prompt(bio_question)
+            print('[Leave blank to delete]')
+            # bio_question = [
+            #     {
+            #         'type': 'editor',
+            #         'name': 'bio',
+            #         'message': 'Leave blank to delete or type new address in the format -> Street, State, City, Postal '
+            #                    '(Esc+Enter to exit): ',
+            #     }
+            # ]
+            # bio_answers = prompt(bio_question)
+            # try:
+            #     print(bio_answers['bio'])
+            #     address = bio_answers['bio'].split(', ')
+            #     if len(address) == 4:
+            #         street = address[0]
+            #         state = address[1]
+            #         city = address[2]
+            #         postal = address[3]
+            #         self.user.change_address(address_id, street, state, city, postal)
+            #     if bio_answers['bio']=='':
+            #         self.user.delete_address(address_id)
+            # except Exception as e:
+            #     # print(e)
+            #     print("Address wasn't changed!")
+            #     time.sleep(2)
             try:
-                print(bio_answers['bio'])
-                address = bio_answers['bio'].split(', ')
-                if len(address) == 4:
-                    street = address[0]
-                    state = address[1]
-                    city = address[2]
-                    postal = address[3]
-                    self.user.change_address(address_id, street, state, city, postal)
-                if bio_answers['bio']=='':
+                street = input('Please enter the street: ')
+                city = input('Please enter the city: ')
+                state = input('Please enter the state: ')
+                postal = input('Please enter the postal code (5 digits): ')
+
+                if postal =='':
                     self.user.delete_address(address_id)
+                elif postal.isdigit() and len(postal) == 5:
+                    self.user.insert_address(street, city, state, postal)
+                else:
+                    print('The postal code must be a 5-digit number.')
+                    time.sleep(1.5)
+                    self._display_change_address()
             except Exception as e:
-                # print(e)
-                print("Address wasn't changed!")
-                time.sleep(2)
+                print(f"An error occurred. Address wasn't changed!{e}")
+                time.sleep(1.5)
             clear_screen()
             self.profile()
 
