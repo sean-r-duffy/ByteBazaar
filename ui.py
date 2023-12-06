@@ -3,6 +3,7 @@ import time
 from PyInquirer import prompt
 import getpass
 from db_operations import DataBase
+from constants import logo
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -133,6 +134,7 @@ class ECommerceApp:
 
     def start(self):
         clear_screen()
+        logo()
         print('ByteBazaar')
         print('-' * 11)
         questions = [
