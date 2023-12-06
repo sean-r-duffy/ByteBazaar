@@ -682,7 +682,7 @@ class ECommerceApp:
                 if postal =='':
                     self.user.delete_address(address_id)
                 elif postal.isdigit() and len(postal) == 5:
-                    self.user.insert_address(street, city, state, postal)
+                    self.user.change_address(address_id, street, state, city, postal)
                 else:
                     print('The postal code must be a 5-digit number.')
                     time.sleep(1.5)
@@ -690,6 +690,7 @@ class ECommerceApp:
             except Exception as e:
                 print(f"An error occurred. Address wasn't changed!{e}")
                 time.sleep(1.5)
+                exit()
             clear_screen()
             self.profile()
 
