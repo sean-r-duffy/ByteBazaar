@@ -1,6 +1,9 @@
-from sqlalchemy import create_engine, Integer, String, Float, ForeignKey, DateTime, CheckConstraint
+from sqlalchemy import create_engine, Integer, String, Float, ForeignKey, DateTime, CheckConstraint, text, BigInteger
 from sqlalchemy.orm import mapped_column, DeclarativeBase, Session
-#import mysql
+from sqlalchemy_utils.functions import database_exists, create_database
+import glob
+# import mysql
+# import mysqlclient
 import constants
 
 engine = create_engine(constants.DATABASE_URI, echo=constants.ECHO)
@@ -41,7 +44,7 @@ class Category(Base):
 class Image(Base):
     __tablename__ = 'image'
 
-    url = mapped_column(String(100), primary_key=True)
+    url = mapped_column(String(200), primary_key=True)
     product_id = mapped_column(Integer, ForeignKey('product.product_id'))
 
 
@@ -109,7 +112,7 @@ class Sale(Base):
     __tablename__ = 'sale'
 
     sale_id = mapped_column(Integer, primary_key=True)
-    order_id = mapped_column(Integer, ForeignKey('order.order_id'))
+    shipment_id = mapped_column(Integer, ForeignKey('shipment.shipment_id'))
     product_id = mapped_column(Integer, ForeignKey('product.product_id'))
     quantity = mapped_column(Integer)
     datetime = mapped_column(DateTime)
@@ -127,8 +130,11 @@ class Buyer(Base):
 class Payment(Base):
     __tablename__ = 'payment'
 
-    card_number = mapped_column(Integer, primary_key=True)
+    card_number = mapped_column(BigInteger, primary_key=True)
     buyer_username = mapped_column(String(40), ForeignKey('buyer.username'))
+    #cvv = mapped_column(Integer)
+    #exp_month = mapped_column(Integer)
+    #exp_day = mapped_column(Integer)
 
 
 class Address(Base):
@@ -142,13 +148,38 @@ class Address(Base):
     zip = mapped_column(Integer)
 
 
-class Order(Base):
-    __tablename__ = 'order'
+class Shipment(Base):
+    __tablename__ = 'shipment'
 
-    order_id = mapped_column(Integer, primary_key=True)
+    shipment_id = mapped_column(Integer, primary_key=True)
     address_id = mapped_column(Integer, ForeignKey('address.address_id'))
     buyer_username = mapped_column(String(40), ForeignKey('buyer.username'))
+    card_number = mapped_column(BigInteger, ForeignKey('payment.card_number'))
 
 
-def create_schema():
-    Base.metadata.create_all(engine)
+def initialize_db():
+    if not database_exists(constants.DATABASE_URI):
+        create_database(constants.DATABASE_URI)
+        Base.metadata.create_all(engine)
+
+        stored_procs = glob.glob('SQL/Stored Procedures/*.sql')
+        functions = glob.glob('SQL/Functions/*.sql')
+        views = 'SQL/views.sql'
+        data = 'SQL/data.sql'
+        trigger = 'SQL/trigger.sql'
+
+        with Session(engine) as session:
+            for x in stored_procs:
+                with open(x) as file:
+                    session.execute(text(file.read()))
+            for x in functions:
+                with open(x) as file:
+                    session.execute(text(file.read()))
+            with open(views) as file:
+                session.execute(text(file.read()))
+            with open(data) as file:
+                session.execute(text(file.read()))
+            with open(trigger) as file:
+                session.execute(text(file.read()))
+
+            session.commit()

@@ -1,4 +1,8 @@
 mysql_connector_repackaged==0.3.1
+mysqlclient==2.2.0
 PyInquirer==1.0.3
 SQLAlchemy==2.0.22
-# TODO: add mysqlclient
+SQLAlchemy_Utils==0.41.1
+pandas==2.1.3
+seaborn==0.13.0
+matplotlib==3.8.2
