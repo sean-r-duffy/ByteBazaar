@@ -626,7 +626,7 @@ class ECommerceApp:
         address_selection = prompt(address_prompt)
         address_id = address_selection['choice']
         address_objs = next(addr for addr in addresses if addr.address_id== address_id)
-        selected_address = ', '.join([address_objs.street, address_objs.city, address_objs.state,zip_to_str(address_objs.zip)])
+        selected_address = ', '.join([address_objs.street, address_objs.city, address_objs.state, zip_to_str(address_objs.zip)])
         clear_screen()
         print(f'Update Existing Address: {selected_address}')
         print('-'*20)
@@ -658,7 +658,7 @@ class ECommerceApp:
                     state = address[1]
                     city = address[2]
                     postal = address[3]
-                    self.user.change_address(address_id, street, state, city, postal)
+                    self.user.change_address(address_id, street, city, state, postal)
                 if bio_answers['bio']=='':
                     self.user.delete_address(address_id)
             except Exception as e:
@@ -668,7 +668,6 @@ class ECommerceApp:
             clear_screen()
             self.profile()
 
-    # TODO: Adjust to handle multiple payments, adding, editing, deleting, payments
     # TODO: Display cvv and exp date
     def _display_change_payment(self):
         clear_screen()
@@ -851,8 +850,8 @@ class ECommerceApp:
         
         sns.set(style="whitegrid")
         plt.figure(figsize=(10, 6))
-        sns.lineplot(x='date', y='sales', data=df, hue='product',marker='o')
-        # sns.lineplot(x='date', y='sales', data=df,marker='o')
+        # sns.lineplot(x='date', y='sales', data=df, hue='product',marker='o')
+        sns.lineplot(x='date', y='sales', data=df, marker='o')
         plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%B'))
         plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
         plt.xticks(rotation=45)

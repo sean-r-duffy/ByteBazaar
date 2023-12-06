@@ -43,7 +43,7 @@ INSERT INTO byte_bazaar.product (name, description, category_id, price, inventor
 INSERT INTO byte_bazaar.product (name, description, category_id, price, inventory) VALUES ('Mystery Novel', 'A thrilling page-turner', 2, 15.99, 100);
 INSERT INTO byte_bazaar.product (name, description, category_id, price, inventory) VALUES ('Cookbook', 'Delicious recipes for home cooking', 2, 20.99, 70);
 INSERT INTO byte_bazaar.product (name, description, category_id, price, inventory) VALUES ('T-Shirt', 'Comfortable cotton tee', 3, 9.99, 150);
-INSERT INTO byte_bazaar.product (name, description, category_id, price, inventory) VALUES ('Jeans', 'Stylish and durable', 3, 39.99, 80);
+INSERT INTO byte_bazaar.product (name, description, category_id, price, inventory) VALUES ('Noise Cancelling Headphones', 'Stylish and durable, high quality', 1, 249.99, 80);
 INSERT INTO byte_bazaar.product (name, description, category_id, price, inventory) VALUES ('Gardening Tools', 'Essential tools for gardening', 4, 29.99, 40);
 INSERT INTO byte_bazaar.product (name, description, category_id, price, inventory) VALUES ('Yoga Mat', 'Eco-friendly and durable', 5, 19.99, 60);
 INSERT INTO byte_bazaar.product (name, description, category_id, price, inventory) VALUES ('Football', 'Professional quality for sports enthusiasts', 5, 24.99, 90);
@@ -69,10 +69,16 @@ INSERT INTO byte_bazaar.product (name, description, category_id, price, inventor
 INSERT INTO byte_bazaar.product (name, description, category_id, price, inventory) VALUES ('Body Lotion', 'Hydrating for all skin types', 7, 11.99, 110);
 INSERT INTO byte_bazaar.product (name, description, category_id, price, inventory) VALUES ('Car Wash Kit', 'Everything you need for a clean car', 8, 19.99, 70);
 INSERT INTO byte_bazaar.product (name, description, category_id, price, inventory) VALUES ('Phone Holder for Car', 'Convenient for navigation', 8, 14.99, 85);
-INSERT INTO byte_bazaar.product (name, description, category_id, price, inventory) VALUES ('Cereal', 'Healthy breakfast option', 9, 3.99, 250);
-INSERT INTO byte_bazaar.product (name, description, category_id, price, inventory) VALUES ('Tea', 'Refreshing and aromatic', 9, 5.99, 200);
-INSERT INTO byte_bazaar.product (name, description, category_id, price, inventory) VALUES ('Cat Toy', 'Fun and engaging for cats', 10, 6.99, 120);
+INSERT INTO byte_bazaar.product (name, description, category_id, price, inventory) VALUES ('Charging Cable', 'Charge your things', 1, 3.99, 250);
+INSERT INTO byte_bazaar.product (name, description, category_id, price, inventory) VALUES ('MP3 Player', '64GB storage, great for bringing on the go', 1, 59.99, 200);
+INSERT INTO byte_bazaar.product (name, description, category_id, price, inventory) VALUES ('Subwoofer', 'Enhance the bass to improve your listening', 1, 199.99, 120);
 INSERT INTO byte_bazaar.product (name, description, category_id, price, inventory) VALUES ('Bird Feeder', 'Attract and feed wild birds', 10, 24.99, 80);
+INSERT INTO byte_bazaar.product (name, description, category_id, price, inventory) VALUES
+('Bluetooth Speaker', 'Compact size with superior sound quality', 1, 89.99, 60),
+('Smart Watch', 'Fitness tracking with smart notifications', 1, 199.99, 45),
+('Gaming Console', 'Next-gen graphics and gameplay', 1, 499.99, 25),
+('E-Reader', 'Lightweight with paper-like display', 1, 129.99, 50),
+('External Hard Drive', '1TB capacity, compact and durable', 1, 79.99, 70);
 INSERT INTO byte_bazaar.platform (name) VALUES ('Facebook');
 INSERT INTO byte_bazaar.platform (name) VALUES ('Twitter');
 INSERT INTO byte_bazaar.platform (name) VALUES ('Instagram');
@@ -238,6 +244,25 @@ INSERT INTO byte_bazaar.shipment (address_id, buyer_username) VALUES (17, 'grace
 INSERT INTO byte_bazaar.shipment (address_id, buyer_username) VALUES (18, 'henry.wilson@bytebazaar.com');
 INSERT INTO byte_bazaar.shipment (address_id, buyer_username) VALUES (19, 'ivy.taylor@bytebazaar.com');
 INSERT INTO byte_bazaar.shipment (address_id, buyer_username) VALUES (20, 'john.doe@bytebazaar.com');
+INSERT INTO byte_bazaar.shipment (address_id, buyer_username) VALUES (20, 'john.doe@bytebazaar.com');
+INSERT INTO byte_bazaar.shipment (address_id, buyer_username) VALUES (20, 'john.doe@bytebazaar.com');
+INSERT INTO byte_bazaar.shipment (address_id, buyer_username) VALUES (14, 'david.brown@bytebazaar.com');
+INSERT INTO byte_bazaar.shipment (address_id, buyer_username) VALUES (14, 'david.brown@bytebazaar.com');
+INSERT INTO byte_bazaar.shipment (address_id, buyer_username) VALUES (14, 'david.brown@bytebazaar.com');
+INSERT INTO byte_bazaar.shipment (address_id, buyer_username) VALUES (14, 'david.brown@bytebazaar.com');
+INSERT INTO byte_bazaar.shipment (address_id, buyer_username) VALUES (15, 'eve.davis@bytebazaar.com');
+INSERT INTO byte_bazaar.shipment (address_id, buyer_username) VALUES (16, 'frank.miller@bytebazaar.com');
+INSERT INTO byte_bazaar.shipment (address_id, buyer_username) VALUES (17, 'grace.lee@bytebazaar.com');
+INSERT INTO byte_bazaar.shipment (address_id, buyer_username) VALUES (18, 'henry.wilson@bytebazaar.com');
+INSERT INTO byte_bazaar.shipment (address_id, buyer_username) VALUES (19, 'ivy.taylor@bytebazaar.com');
+INSERT INTO byte_bazaar.shipment (address_id, buyer_username) VALUES (20, 'john.doe@bytebazaar.com');
+INSERT INTO byte_bazaar.shipment (address_id, buyer_username) VALUES (20, 'john.doe@bytebazaar.com');
+INSERT INTO byte_bazaar.shipment (address_id, buyer_username) VALUES (20, 'john.doe@bytebazaar.com');
+INSERT INTO byte_bazaar.shipment (address_id, buyer_username) VALUES (14, 'david.brown@bytebazaar.com');
+INSERT INTO byte_bazaar.shipment (address_id, buyer_username) VALUES (14, 'david.brown@bytebazaar.com');
+INSERT INTO byte_bazaar.shipment (address_id, buyer_username) VALUES (14, 'david.brown@bytebazaar.com');
+
+
 INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (2, 1, 1, '2023-01-01 10:00:00', 'CAMP001');
 INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (3, 2, 2, '2023-01-02 11:00:00', NULL);
 INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (4, 3, 1, '2023-01-03 12:00:00', 'CAMP003');
@@ -266,4 +291,28 @@ INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo
 INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (27, 34, 5, '2023-11-28 22:40:57', NULL);
 INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (28, 33, 3, '2023-11-12 22:40:57', NULL);
 INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (29, 33, 5, '2023-11-11 22:40:57', NULL);
-INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (30, 32, 2, '2023-11-12 22:40:57', NULL);
+INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (30, 32, 2, '2023-09-12 22:40:57', NULL);
+INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (31, 31, 2, '2023-09-12 22:40:57', NULL);
+INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (32, 33, 2, '2023-12-12 22:40:57', NULL);
+INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (33, 33, 2, '2023-01-12 22:40:57', NULL);
+INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (34, 31, 2, '2023-11-12 22:40:57', NULL);
+INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (35, 34, 2, '2023-08-12 22:40:57', NULL);
+
+INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (36, 36, 1, '2023-12-04 22:40:57', NULL);
+INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (37, 37, 4, '2023-05-09 22:40:57', NULL);
+INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (38, 38, 4, '2023-06-17 22:40:57', NULL);
+INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (39, 39, 5, '2023-10-28 22:40:57', NULL);
+INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (40, 40, 3, '2023-08-12 22:40:57', NULL);
+INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (41, 39, 5, '2023-08-11 22:40:57', NULL);
+INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (42, 38, 2, '2023-07-12 22:40:57', NULL);
+INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (43, 37, 2, '2023-06-12 22:40:57', NULL);
+INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (44, 36, 2, '2023-06-12 22:40:57', NULL);
+INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (45, 36, 2, '2023-02-12 22:40:57', NULL);
+INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (46, 38, 2, '2023-07-12 22:40:57', NULL);
+INSERT INTO byte_bazaar.sale (shipment_id, product_id, quantity, datetime, promo_code) VALUES (47, 39, 2, '2023-08-12 22:40:57', NULL);
+
+INSERT INTO byte_bazaar.sells (seller_id, product_id) VALUES (6, 36);
+INSERT INTO byte_bazaar.sells (seller_id, product_id) VALUES (6, 37);
+INSERT INTO byte_bazaar.sells (seller_id, product_id) VALUES (6, 38);
+INSERT INTO byte_bazaar.sells (seller_id, product_id) VALUES (6, 39);
+INSERT INTO byte_bazaar.sells (seller_id, product_id) VALUES (6, 40);
