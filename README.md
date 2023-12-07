@@ -2,8 +2,10 @@
 ## Nick Cantalupa, Sean Duffy, Atyab Hakeem, Daniel Rabinovitz
 
 ### Mac Users:
-mysql-client needs to be installed:\
+mysql-client needs to be installed:
+```
 brew install mysql-client
+```
 
 ### To enable initialization of database:
 In MySQL>Administration>Management>Users and Privileges, add a user:\
