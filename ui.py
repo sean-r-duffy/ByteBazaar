@@ -882,7 +882,7 @@ class ECommerceApp:
         plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%B'))
         plt.gca().xaxis.set_major_locator(mdates.MonthLocator())
         plt.xticks(rotation=45)
-        plt.title('Sales by Product Per Month')
+        plt.title('Sales Per Month')
         plt.xlabel('Product')
         plt.ylabel('Sales')
         plt.show(block=True)
