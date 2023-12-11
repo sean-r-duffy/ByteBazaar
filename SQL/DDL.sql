@@ -49,7 +49,6 @@ CREATE TABLE IF NOT EXISTS `byte_bazaar`.`address` (
     FOREIGN KEY (`buyer_username`)
     REFERENCES `byte_bazaar`.`buyer` (`username`))
 ENGINE = InnoDB
-AUTO_INCREMENT = 23
 DEFAULT CHARACTER SET = utf8mb3;
 
 
@@ -64,7 +63,6 @@ CREATE TABLE IF NOT EXISTS `byte_bazaar`.`category` (
   `description` VARCHAR(200) NULL DEFAULT NULL,
   PRIMARY KEY (`category_id`))
 ENGINE = InnoDB
-AUTO_INCREMENT = 11
 DEFAULT CHARACTER SET = utf8mb3;
 
 
@@ -86,7 +84,6 @@ CREATE TABLE IF NOT EXISTS `byte_bazaar`.`product` (
     FOREIGN KEY (`category_id`)
     REFERENCES `byte_bazaar`.`category` (`category_id`))
 ENGINE = InnoDB
-AUTO_INCREMENT = 37
 DEFAULT CHARACTER SET = utf8mb3;
 
 
@@ -102,7 +99,6 @@ CREATE TABLE IF NOT EXISTS `byte_bazaar`.`influencer` (
   `password` VARCHAR(40) NULL DEFAULT NULL,
   PRIMARY KEY (`influencer_id`))
 ENGINE = InnoDB
-AUTO_INCREMENT = 11
 DEFAULT CHARACTER SET = utf8mb3;
 
 
@@ -199,7 +195,6 @@ CREATE TABLE IF NOT EXISTS `byte_bazaar`.`payment` (
     FOREIGN KEY (`buyer_username`)
     REFERENCES `byte_bazaar`.`buyer` (`username`))
 ENGINE = InnoDB
-AUTO_INCREMENT = 123456780000001
 DEFAULT CHARACTER SET = utf8mb3;
 
 
@@ -249,7 +244,6 @@ CREATE TABLE IF NOT EXISTS `byte_bazaar`.`shipment` (
     FOREIGN KEY (`card_number`)
     REFERENCES `byte_bazaar`.`payment` (`card_number`))
 ENGINE = InnoDB
-AUTO_INCREMENT = 31
 DEFAULT CHARACTER SET = utf8mb3;
 
 
@@ -279,7 +273,6 @@ CREATE TABLE IF NOT EXISTS `byte_bazaar`.`sale` (
     FOREIGN KEY (`promo_code`)
     REFERENCES `byte_bazaar`.`campaign` (`campaign_id`))
 ENGINE = InnoDB
-AUTO_INCREMENT = 30
 DEFAULT CHARACTER SET = utf8mb3;
 
 
@@ -295,7 +288,6 @@ CREATE TABLE IF NOT EXISTS `byte_bazaar`.`seller` (
   `password` VARCHAR(40) NULL DEFAULT NULL,
   PRIMARY KEY (`seller_id`))
 ENGINE = InnoDB
-AUTO_INCREMENT = 11
 DEFAULT CHARACTER SET = utf8mb3;
 
 
